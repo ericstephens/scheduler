@@ -54,9 +54,5 @@ def add_error_handlers(app: FastAPI):
             content={"detail": str(exc)}
         )
 
-    @app.exception_handler(404)
-    async def not_found_exception_handler(request: Request, exc: HTTPException):
-        return JSONResponse(
-            status_code=404,
-            content={"detail": "Resource not found"}
-        )
+    # Let FastAPI handle HTTPException naturally to preserve specific error messages
+    # @app.exception_handler(HTTPException) - removed to preserve specific 404 messages
