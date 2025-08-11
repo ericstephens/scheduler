@@ -39,7 +39,7 @@ scheduler/
 │   │   ├── types/
 │   │   ├── utils/
 │   │   └── test/      # Frontend tests
-│   ├── backend/       # Node.js API layer
+│   ├── api/           # Node.js API layer
 │   │   ├── routes/
 │   │   ├── controllers/
 │   │   ├── middleware/
@@ -136,7 +136,7 @@ Use podman commands instead of docker:
 
 ## Commands to Remember
 
-- **Development**: `npm run dev` (frontend), `npm run start:dev` (backend)
+- **Development**: `npm run dev` (frontend), `npm run start:dev` (api)
 - **Testing**: `npm test` (appropriate test runner per layer)
 - **Database**: `npx prisma migrate dev`, `npx prisma studio`
 - **Management**: `./manage.sh start|stop|restart`
