@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from .rating import InstructorCourseRatingResponse
 from .assignment import InstructorAssignmentResponse
 
@@ -27,15 +27,13 @@ class InstructorResponse(InstructorBase):
     active_status: bool
     created_date: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class InstructorDetailResponse(InstructorResponse):
     course_ratings: List[InstructorCourseRatingResponse] = []
     assignments: List[InstructorAssignmentResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class InstructorSearchRequest(BaseModel):
     name: Optional[str] = None

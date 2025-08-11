@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class CourseBase(BaseModel):
     course_name: str = Field(..., min_length=1, max_length=200)
@@ -23,8 +23,7 @@ class CourseResponse(CourseBase):
     active_status: bool
     created_date: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class CourseSearchRequest(BaseModel):
     name: Optional[str] = None
