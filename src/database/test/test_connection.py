@@ -15,7 +15,7 @@ class TestDatabaseConnection:
         """Test database URL generation with default values."""
         with patch.dict(os.environ, {}, clear=True):
             url = get_database_url()
-            expected = "postgresql://postgres:postgres@localhost:5432/scheduler"
+            expected = "postgresql+psycopg://postgres:postgres@localhost:5432/scheduler"
             assert url == expected
 
     def test_get_database_url_custom_values(self):
@@ -30,23 +30,23 @@ class TestDatabaseConnection:
         
         with patch.dict(os.environ, env_vars):
             url = get_database_url()
-            expected = "postgresql://custom_user:custom_pass@custom-host:5433/custom_db"
+            expected = "postgresql+psycopg://custom_user:custom_pass@custom-host:5433/custom_db"
             assert url == expected
 
     def test_create_db_engine(self):
         """Test engine creation."""
-        test_url = "postgresql://test:test@localhost:5432/test"
+        test_url = "postgresql+psycopg://test:test@localhost:5432/test"
         engine = create_db_engine(test_url)
         
         assert engine is not None
         # SQLAlchemy masks passwords in string representation
         engine_url_str = str(engine.url)
-        assert "postgresql://test:" in engine_url_str
+        assert "postgresql+psycopg://test:" in engine_url_str
         assert "@localhost:5432/test" in engine_url_str
 
     def test_create_session_factory(self):
         """Test session factory creation."""
-        test_url = "postgresql://test:test@localhost:5432/test"
+        test_url = "postgresql+psycopg://test:test@localhost:5432/test"
         engine = create_db_engine(test_url)
         session_factory = create_session_factory(engine)
         

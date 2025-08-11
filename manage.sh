@@ -85,6 +85,38 @@ db_test_coverage() {
     run_in_env python -m pytest src/database/test/ --cov=src.database --cov-report=html --cov-report=term -v "$@"
 }
 
+# API management functions
+api_test() {
+    log "Running API tests..."
+    TESTING=1 run_in_env python -m pytest src/api/test/ -v "$@"
+}
+
+api_test_coverage() {
+    log "Running API tests with coverage..."
+    TESTING=1 run_in_env python -m pytest src/api/test/ --cov=src.api --cov-report=html --cov-report=term -v "$@"
+}
+
+api_start() {
+    log "Starting API server..."
+    run_in_env python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+}
+
+api_start_prod() {
+    log "Starting API server in production mode..."
+    run_in_env python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+}
+
+# Combined test functions
+test_all() {
+    log "Running all tests..."
+    TESTING=1 run_in_env python -m pytest src/database/test/ src/api/test/ -v "$@"
+}
+
+test_all_coverage() {
+    log "Running all tests with coverage..."
+    TESTING=1 run_in_env python -m pytest src/database/test/ src/api/test/ --cov=src --cov-report=html --cov-report=term -v "$@"
+}
+
 db_start() {
     log "Starting PostgreSQL container..."
     if command -v podman-compose &> /dev/null; then
@@ -163,6 +195,16 @@ usage() {
     echo "  db-restart        Restart PostgreSQL container"
     echo "  db-shell          Connect to PostgreSQL shell"
     echo ""
+    echo "API Commands:"
+    echo "  api-test [args]    Run API tests (with optional pytest args)"
+    echo "  api-test-coverage  Run API tests with coverage report"
+    echo "  api-start         Start API development server"
+    echo "  api-start-prod    Start API production server"
+    echo ""
+    echo "Testing Commands:"
+    echo "  test-all          Run all tests (database + API)"
+    echo "  test-all-coverage Run all tests with coverage report"
+    echo ""
     echo "General Commands:"
     echo "  run <command>     Run any command in the conda environment"
     echo ""
@@ -198,6 +240,28 @@ case "${1:-}" in
         ;;
     db-shell)
         db_shell
+        ;;
+    api-test)
+        shift
+        api_test "$@"
+        ;;
+    api-test-coverage)
+        shift
+        api_test_coverage "$@"
+        ;;
+    api-start)
+        api_start
+        ;;
+    api-start-prod)
+        api_start_prod
+        ;;
+    test-all)
+        shift
+        test_all "$@"
+        ;;
+    test-all-coverage)
+        shift
+        test_all_coverage "$@"
         ;;
     run)
         shift

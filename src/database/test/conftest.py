@@ -5,13 +5,21 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from pytest_postgresql.factories import postgresql_proc, postgresql
 from src.database.connection import Base
 from src.database.models import *
 
+# PostgreSQL process and database fixtures
+postgresql_proc = postgresql_proc(port=None, unixsocketdir='/tmp')
+postgresql = postgresql('postgresql_proc')
+
 @pytest.fixture(scope='function')
-def db_engine():
-    """Create test database engine using in-memory SQLite for testing."""
-    engine = create_engine("sqlite:///:memory:", echo=False)
+def db_engine(postgresql):
+    """Create test database engine using PostgreSQL for testing."""
+    engine = create_engine(
+        f"postgresql+psycopg://{postgresql.info.user}:@{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}",
+        echo=False
+    )
     Base.metadata.create_all(engine)
     yield engine
     Base.metadata.drop_all(engine)

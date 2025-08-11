@@ -4,7 +4,8 @@ channels:
   - defaults
 dependencies:
   - python=3.11
-  - psycopg2=2.9.9
+  - postgresql
+  - libpq
   - sqlalchemy=2.0.23
   - alembic=1.13.1
   - pydantic=2.5.0
@@ -12,7 +13,16 @@ dependencies:
   - pytest-asyncio=0.21.1
   - pytest-cov=4.1.0
   - python-dotenv=1.0.0
+  - setuptools<81
   - pip
   - pip:
+    - psycopg[binary]==3.1.13
     - asyncpg==0.29.0
     - pytest-postgresql==5.0.0
+    - fastapi==0.104.1
+    - uvicorn[standard]==0.24.0
+    - httpx==0.25.2
+    - python-multipart==0.0.6
+    - python-jose[cryptography]==3.3.0
+    - passlib[bcrypt]==1.7.4
+    - pydantic[email]==2.5.0

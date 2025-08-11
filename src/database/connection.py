@@ -16,7 +16,7 @@ def get_database_url():
     username = os.getenv('DB_USER', 'postgres')
     password = os.getenv('DB_PASSWORD', 'postgres')
     
-    return f"postgresql://{username}:{password}@{host}:{port}/{database}"
+    return f"postgresql+psycopg://{username}:{password}@{host}:{port}/{database}"
 
 def create_db_engine(database_url=None):
     """Create SQLAlchemy engine."""
@@ -37,12 +37,27 @@ def create_session_factory(engine):
     return sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Global engine and session factory for the application
-engine = create_db_engine()
-SessionLocal = create_session_factory(engine)
+engine = None
+SessionLocal = None
+
+def _get_engine():
+    """Get or create the database engine."""
+    global engine
+    if engine is None:
+        engine = create_db_engine()
+    return engine
+
+def _get_session_factory():
+    """Get or create the session factory."""
+    global SessionLocal
+    if SessionLocal is None:
+        SessionLocal = create_session_factory(_get_engine())
+    return SessionLocal
 
 def get_db_session():
     """Get database session."""
-    db = SessionLocal()
+    session_factory = _get_session_factory()
+    db = session_factory()
     try:
         yield db
     finally:
@@ -50,4 +65,4 @@ def get_db_session():
 
 def init_database():
     """Initialize database tables."""
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=_get_engine())
