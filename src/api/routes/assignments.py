@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
 from src.database.connection import get_db_session
 from src.database.repository import AssignmentRepository, InstructorRepository
-from src.database.models import AssignmentStatus, SessionDay, SessionType
+from src.database.models import AssignmentStatus, CourseSessionDay, SessionType
 from src.database.utils import (
     check_instructor_availability,
     get_instructor_conflicts
@@ -40,8 +40,8 @@ async def create_assignment(
         raise HTTPException(status_code=404, detail="Instructor not found")
     
     # Verify session day exists
-    session_day = db.query(SessionDay).filter(
-        SessionDay.id == assignment.session_day_id
+    session_day = db.query(CourseSessionDay).filter(
+        CourseSessionDay.id == assignment.session_day_id
     ).first()
     if not session_day:
         raise HTTPException(status_code=404, detail="Session day not found")
@@ -180,8 +180,8 @@ async def create_bulk_assignments(
         raise HTTPException(status_code=404, detail="Instructor not found")
     
     # Verify all session days exist
-    session_days = db.query(SessionDay).filter(
-        SessionDay.id.in_(bulk_assignment.session_day_ids)
+    session_days = db.query(CourseSessionDay).filter(
+        CourseSessionDay.id.in_(bulk_assignment.session_day_ids)
     ).all()
     
     if len(session_days) != len(bulk_assignment.session_day_ids):
@@ -234,8 +234,8 @@ async def check_assignment_conflicts(
         raise HTTPException(status_code=404, detail="Instructor not found")
     
     # Verify session day exists
-    session_day = db.query(SessionDay).filter(
-        SessionDay.id == conflict_check.session_day_id
+    session_day = db.query(CourseSessionDay).filter(
+        CourseSessionDay.id == conflict_check.session_day_id
     ).first()
     if not session_day:
         raise HTTPException(status_code=404, detail="Session day not found")

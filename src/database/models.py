@@ -70,7 +70,7 @@ class Location(Base):
     notes = Column(Text)
     
     # Relationships
-    session_days = relationship("SessionDay", back_populates="location")
+    session_days = relationship("CourseSessionDay", back_populates="location")
 
 class InstructorCourseRating(Base):
     __tablename__ = "instructor_course_ratings"
@@ -100,9 +100,9 @@ class CourseSession(Base):
     
     # Relationships
     course = relationship("Course", back_populates="course_sessions")
-    session_days = relationship("SessionDay", back_populates="session")
+    session_days = relationship("CourseSessionDay", back_populates="session")
 
-class SessionDay(Base):
+class CourseSessionDay(Base):
     __tablename__ = "session_days"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -131,5 +131,5 @@ class InstructorAssignment(Base):
     notes = Column(Text)
     
     # Relationships
-    session_day = relationship("SessionDay", back_populates="instructor_assignments")
+    session_day = relationship("CourseSessionDay", back_populates="instructor_assignments")
     instructor = relationship("Instructor", back_populates="assignments")

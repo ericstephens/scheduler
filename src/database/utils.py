@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import date, datetime, time
 from sqlalchemy.orm import Session
 from .models import (
-    Instructor, Course, InstructorCourseRating, SessionDay, 
+    Instructor, Course, InstructorCourseRating, CourseSessionDay, 
     InstructorAssignment, RatingType
 )
 from .repository import RatingRepository
@@ -17,9 +17,9 @@ def check_instructor_availability(db: Session, instructor_id: int,
                                 check_date: date, start_time: time, 
                                 end_time: time) -> bool:
     """Check if an instructor is available on a specific date and time."""
-    existing_assignments = db.query(InstructorAssignment).join(SessionDay).filter(
+    existing_assignments = db.query(InstructorAssignment).join(CourseSessionDay).filter(
         InstructorAssignment.instructor_id == instructor_id,
-        SessionDay.date == check_date
+        CourseSessionDay.date == check_date
     ).all()
     
     for assignment in existing_assignments:
@@ -34,9 +34,9 @@ def get_instructor_conflicts(db: Session, instructor_id: int,
                            check_date: date, start_time: time, 
                            end_time: time) -> list[InstructorAssignment]:
     """Get all conflicting assignments for an instructor on a specific date and time."""
-    existing_assignments = db.query(InstructorAssignment).join(SessionDay).filter(
+    existing_assignments = db.query(InstructorAssignment).join(CourseSessionDay).filter(
         InstructorAssignment.instructor_id == instructor_id,
-        SessionDay.date == check_date
+        CourseSessionDay.date == check_date
     ).all()
     
     conflicts = []
@@ -56,14 +56,14 @@ def get_instructor_full_name(instructor: Instructor) -> str:
     """Get formatted full name for an instructor."""
     return f"{instructor.first_name} {instructor.last_name}"
 
-def get_session_duration_hours(session_day: SessionDay) -> float:
+def get_session_duration_hours(session_day: CourseSessionDay) -> float:
     """Calculate the duration of a session day in hours."""
     start_datetime = datetime.combine(date.today(), session_day.start_time)
     end_datetime = datetime.combine(date.today(), session_day.end_time)
     duration = end_datetime - start_datetime
     return duration.total_seconds() / 3600
 
-def format_session_time_range(session_day: SessionDay) -> str:
+def format_session_time_range(session_day: CourseSessionDay) -> str:
     """Format session time range as a string."""
     return f"{session_day.start_time.strftime('%H:%M')} - {session_day.end_time.strftime('%H:%M')}"
 
@@ -102,11 +102,11 @@ def get_upcoming_assignments(db: Session, instructor_id: int, days_ahead: int = 
     cutoff_date = date.today()
     end_date = date.fromordinal(cutoff_date.toordinal() + days_ahead)
     
-    return db.query(InstructorAssignment).join(SessionDay).filter(
+    return db.query(InstructorAssignment).join(CourseSessionDay).filter(
         InstructorAssignment.instructor_id == instructor_id,
-        SessionDay.date >= cutoff_date,
-        SessionDay.date <= end_date
-    ).order_by(SessionDay.date, SessionDay.start_time).all()
+        CourseSessionDay.date >= cutoff_date,
+        CourseSessionDay.date <= end_date
+    ).order_by(CourseSessionDay.date, CourseSessionDay.start_time).all()
 
 def get_instructor_stats(db: Session, instructor_id: int) -> dict:
     """Get statistics for an instructor."""

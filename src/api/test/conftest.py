@@ -127,7 +127,7 @@ def sample_session(test_db_session, sample_course):
 def sample_session_day(test_db_session, sample_session, sample_location):
     """Create sample session day."""
     from datetime import date, time
-    session_day = SessionDay(
+    session_day = CourseSessionDay(
         session_id=sample_session.id,
         day_number=1,
         date=date(2024, 12, 1),

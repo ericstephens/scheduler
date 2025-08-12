@@ -37,7 +37,7 @@ class CourseSessionResponse(CourseSessionBase):
     class Config:
         from_attributes = True
 
-class SessionDayBase(BaseModel):
+class CourseSessionDayBase(BaseModel):
     session_id: int
     day_number: int = Field(..., ge=1)
     date: date
@@ -46,10 +46,10 @@ class SessionDayBase(BaseModel):
     end_time: time
     session_type: SessionType
 
-class SessionDayCreate(SessionDayBase):
+class CourseSessionDayCreate(CourseSessionDayBase):
     pass
 
-class SessionDayUpdate(BaseModel):
+class CourseSessionDayUpdate(BaseModel):
     day_number: Optional[int] = Field(None, ge=1)
     date: Optional[date] = None
     location_id: Optional[int] = None
@@ -57,7 +57,7 @@ class SessionDayUpdate(BaseModel):
     end_time: Optional[time] = None
     session_type: Optional[SessionType] = None
 
-class SessionDayResponse(SessionDayBase):
+class CourseSessionDayResponse(CourseSessionDayBase):
     id: int
 
     class Config:

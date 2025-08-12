@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 from datetime import date, time, datetime
 from src.database.models import (
     Instructor, Course, Location, InstructorCourseRating, 
-    CourseSession, SessionDay, InstructorAssignment,
+    CourseSession, CourseSessionDay, InstructorAssignment,
     RatingType, SessionStatus, SessionType, AssignmentStatus
 )
 
@@ -144,8 +144,8 @@ class TestCourseSession:
         assert session.start_date == date(2024, 3, 1)
         assert session.status == SessionStatus.SCHEDULED
 
-class TestSessionDay:
-    def test_create_session_day(self, db_session, sample_course, sample_location):
+class TestCourseSessionDay:
+    def test_create_course_session_day(self, db_session, sample_course, sample_location):
         # First create a class session
         session = CourseSession(
             course_id=sample_course.id,
@@ -156,7 +156,7 @@ class TestSessionDay:
         db_session.add(session)
         db_session.commit()
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 3, 1),
@@ -184,7 +184,7 @@ class TestInstructorAssignment:
         db_session.add(session)
         db_session.commit()
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 3, 1),
@@ -220,7 +220,7 @@ class TestInstructorAssignment:
         db_session.add(session)
         db_session.commit()
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 3, 1),

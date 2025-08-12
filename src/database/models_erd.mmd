@@ -81,7 +81,7 @@ erDiagram
         text notes
     }
 
-    SessionDay {
+    CourseSessionDay {
         int id PK
         int session_id FK
         int day_number
@@ -109,8 +109,8 @@ erDiagram
     
     Course ||--o{ CourseSession : "has sessions"
     
-    CourseSession ||--o{ SessionDay : "consists of days"
-    Location ||--o{ SessionDay : "hosts"
+    CourseSession ||--o{ CourseSessionDay : "consists of days"
+    Location ||--o{ CourseSessionDay : "hosts"
     
-    SessionDay ||--o{ InstructorAssignment : "has assignments"
+    CourseSessionDay ||--o{ InstructorAssignment : "has assignments"
     Instructor ||--o{ InstructorAssignment : "assigned to"

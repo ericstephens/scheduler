@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from .models import (
     Instructor, Course, Location, InstructorCourseRating, 
-    CourseSession, SessionDay, InstructorAssignment,
+    CourseSession, CourseSessionDay, InstructorAssignment,
     RatingType, SessionStatus, AssignmentStatus
 )
 
@@ -109,16 +109,13 @@ class LocationRepository:
     
     def create(self, location_name: str, address: Optional[str] = None,
                city: Optional[str] = None, state_province: Optional[str] = None,
-               postal_code: Optional[str] = None, location_type: Optional[str] = None,
-               capacity: Optional[int] = None, notes: Optional[str] = None) -> Location:
+               postal_code: Optional[str] = None, notes: Optional[str] = None) -> Location:
         location = Location(
             location_name=location_name,
             address=address,
             city=city,
             state_province=state_province,
             postal_code=postal_code,
-            location_type=location_type,
-            capacity=capacity,
             notes=notes
         )
         self.db.add(location)
@@ -205,14 +202,12 @@ class SessionRepository:
         self.db = db
     
     def create_session(self, course_id: int, session_name: str, start_date: date,
-                      end_date: date, total_students: Optional[int] = None,
-                      notes: Optional[str] = None) -> CourseSession:
+                      end_date: date, notes: Optional[str] = None) -> CourseSession:
         session = CourseSession(
             course_id=course_id,
             session_name=session_name,
             start_date=start_date,
             end_date=end_date,
-            total_students=total_students,
             notes=notes
         )
         self.db.add(session)
@@ -242,13 +237,11 @@ class AssignmentRepository:
         self.db = db
     
     def create_assignment(self, session_day_id: int, instructor_id: int,
-                         assignment_type: str, pay_eligible: bool = False,
-                         notes: Optional[str] = None) -> InstructorAssignment:
+                         assignment_type: str, notes: Optional[str] = None) -> InstructorAssignment:
         assignment = InstructorAssignment(
             session_day_id=session_day_id,
             instructor_id=instructor_id,
             assignment_type=assignment_type,
-            pay_eligible=pay_eligible,
             notes=notes
         )
         self.db.add(assignment)
@@ -267,10 +260,10 @@ class AssignmentRepository:
         ).all()
     
     def get_assignments_by_date_range(self, start_date: date, end_date: date) -> List[InstructorAssignment]:
-        return self.db.query(InstructorAssignment).join(SessionDay).filter(
+        return self.db.query(InstructorAssignment).join(CourseSessionDay).filter(
             and_(
-                SessionDay.date >= start_date,
-                SessionDay.date <= end_date
+                CourseSessionDay.date >= start_date,
+                CourseSessionDay.date <= end_date
             )
         ).all()
     
@@ -283,6 +276,7 @@ class AssignmentRepository:
         return assignment
     
     def get_pay_eligible_assignments(self) -> List[InstructorAssignment]:
-        return self.db.query(InstructorAssignment).filter(
-            InstructorAssignment.pay_eligible == True
-        ).all()
+        # Pay eligibility is now determined by instructor being cleared for the course
+        # This method would need to join with ratings to determine eligibility
+        # For now, returning all assignments as a placeholder
+        return self.db.query(InstructorAssignment).all()

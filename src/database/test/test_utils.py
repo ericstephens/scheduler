@@ -13,7 +13,7 @@ from src.database.utils import (
     get_instructor_stats
 )
 from src.database.models import (
-    SessionDay, InstructorAssignment, InstructorCourseRating,
+    CourseSessionDay, InstructorAssignment, InstructorCourseRating,
     RatingType, SessionType
 )
 
@@ -67,7 +67,7 @@ class TestAvailabilityUtils:
             sample_course.id, "Existing Session", date(2024, 8, 15), date(2024, 8, 15)
         )
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 8, 15),
@@ -83,7 +83,6 @@ class TestAvailabilityUtils:
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
             assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True
         )
         db_session.add(assignment)
         db_session.commit()
@@ -116,7 +115,7 @@ class TestAvailabilityUtils:
             sample_course.id, "Conflicting Session", date(2024, 9, 1), date(2024, 9, 1)
         )
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 9, 1),
@@ -132,7 +131,6 @@ class TestAvailabilityUtils:
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
             assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True
         )
         db_session.add(assignment)
         db_session.commit()
@@ -157,7 +155,7 @@ class TestSessionUtils:
             sample_course.id, "Duration Test", date(2024, 10, 1), date(2024, 10, 1)
         )
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 10, 1),
@@ -179,7 +177,7 @@ class TestSessionUtils:
             sample_course.id, "Format Test", date(2024, 11, 1), date(2024, 11, 1)
         )
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 11, 1),
@@ -233,7 +231,7 @@ class TestReportingUtils:
             sample_course.id, "Future Session", future_date, future_date
         )
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=future_session.id,
             day_number=1,
             date=future_date,
@@ -249,7 +247,6 @@ class TestReportingUtils:
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
             assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True
         )
         db_session.add(assignment)
         db_session.commit()
@@ -276,7 +273,7 @@ class TestReportingUtils:
             sample_course.id, "Stats Test", date(2024, 12, 1), date(2024, 12, 1)
         )
         
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 12, 1),
@@ -292,7 +289,6 @@ class TestReportingUtils:
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
             assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True
         )
         db_session.add(assignment)
         db_session.commit()
@@ -300,11 +296,10 @@ class TestReportingUtils:
         stats = get_instructor_stats(db_session, sample_instructor.id)
         
         assert stats["total_assignments"] >= 1
-        assert stats["pay_eligible_assignments"] >= 1
+        # Pay eligible assignments field has been removed
         assert stats["total_course_ratings"] >= 1
         assert stats["cleared_courses"] >= 1
         assert isinstance(stats, dict)
         assert all(key in stats for key in [
-            "total_assignments", "pay_eligible_assignments", 
-            "total_course_ratings", "cleared_courses"
+            "total_assignments", "total_course_ratings", "cleared_courses"
         ])

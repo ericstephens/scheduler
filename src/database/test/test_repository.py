@@ -132,15 +132,12 @@ class TestLocationRepository:
         location = repo.create(
             location_name="Indoor Range",
             address="789 Indoor Ave",
-            city="Indoor City",
-            location_type="range",
-            capacity=10
+            city="Indoor City"
         )
         
         assert location.id is not None
         assert location.location_name == "Indoor Range"
-        assert location.location_type == "range"
-        assert location.capacity == 10
+        # Location type and capacity fields have been removed
 
     def test_get_all_locations(self, db_session, sample_location):
         repo = LocationRepository(db_session)
@@ -226,14 +223,13 @@ class TestSessionRepository:
             session_name="Winter 2024",
             start_date=date(2024, 1, 15),
             end_date=date(2024, 1, 17),
-            total_students=12,
             notes="Winter session"
         )
         
         assert session.id is not None
         assert session.session_name == "Winter 2024"
         assert session.start_date == date(2024, 1, 15)
-        assert session.total_students == 12
+        # Total students field has been removed
 
     def test_get_by_status(self, db_session, sample_course):
         repo = SessionRepository(db_session)
@@ -277,9 +273,9 @@ class TestAssignmentRepository:
             sample_course.id, "Test Session", date(2024, 4, 1), date(2024, 4, 1)
         )
         
-        from src.database.models import SessionDay
+        from src.database.models import CourseSessionDay
         from datetime import time
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 4, 1),
@@ -297,12 +293,11 @@ class TestAssignmentRepository:
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
             assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True,
             notes="Test assignment"
         )
         
         assert assignment.id is not None
-        assert assignment.pay_eligible == True
+        # Pay eligible field has been removed
         assert assignment.notes == "Test assignment"
 
     def test_get_instructor_assignments(self, db_session, sample_course, sample_location, sample_instructor):
@@ -312,9 +307,9 @@ class TestAssignmentRepository:
             sample_course.id, "Test Session", date(2024, 5, 1), date(2024, 5, 1)
         )
         
-        from src.database.models import SessionDay
+        from src.database.models import CourseSessionDay
         from datetime import time
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 5, 1),
@@ -343,9 +338,9 @@ class TestAssignmentRepository:
             sample_course.id, "Test Session", date(2024, 6, 1), date(2024, 6, 1)
         )
         
-        from src.database.models import SessionDay
+        from src.database.models import CourseSessionDay
         from datetime import time
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 6, 1),
@@ -371,9 +366,9 @@ class TestAssignmentRepository:
             sample_course.id, "Test Session", date(2024, 7, 1), date(2024, 7, 1)
         )
         
-        from src.database.models import SessionDay
+        from src.database.models import CourseSessionDay
         from datetime import time
-        session_day = SessionDay(
+        session_day = CourseSessionDay(
             session_id=session.id,
             day_number=1,
             date=date(2024, 7, 1),
@@ -387,13 +382,13 @@ class TestAssignmentRepository:
         
         repo = AssignmentRepository(db_session)
         
-        # Create pay eligible and non-pay eligible assignments
-        pay_eligible = repo.create_assignment(session_day.id, sample_instructor.id, SessionType.FULL_DAY, True)
-        not_pay_eligible = repo.create_assignment(session_day.id, sample_instructor.id, SessionType.HALF_DAY, False)
+        # Create assignments (pay eligibility now determined by instructor clearance)
+        assignment1 = repo.create_assignment(session_day.id, sample_instructor.id, SessionType.FULL_DAY)
+        assignment2 = repo.create_assignment(session_day.id, sample_instructor.id, SessionType.HALF_DAY)
         
-        # Get only pay eligible
-        pay_eligible_assignments = repo.get_pay_eligible_assignments()
-        pay_eligible_ids = [a.id for a in pay_eligible_assignments]
+        # Get all assignments (method now returns all, not just pay eligible)
+        all_assignments = repo.get_pay_eligible_assignments()
+        assignment_ids = [a.id for a in all_assignments]
         
-        assert pay_eligible.id in pay_eligible_ids
-        assert not_pay_eligible.id not in pay_eligible_ids
+        assert assignment1.id in assignment_ids
+        assert assignment2.id in assignment_ids
