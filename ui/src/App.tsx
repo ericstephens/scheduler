@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Instructors from './pages/Instructors'
 import Courses from './pages/Courses'
 import Sessions from './pages/Sessions'
+import Locations from './pages/Locations'
 
 // Create a client
 const queryClient = new QueryClient({
@@ -28,6 +29,7 @@ function App() {
               <Route path="/instructors" element={<Instructors />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/sessions" element={<Sessions />} />
+              <Route path="/locations" element={<Locations />} />
             </Routes>
           </Layout>
           

@@ -132,12 +132,47 @@ class TestLocationRepository:
         location = repo.create(
             location_name="Indoor Range",
             address="789 Indoor Ave",
-            city="Indoor City"
+            city="Indoor City",
+            state_province="TX",
+            postal_code="12345",
+            notes="Professional training facility"
         )
         
         assert location.id is not None
         assert location.location_name == "Indoor Range"
-        # Location type and capacity fields have been removed
+        assert location.address == "789 Indoor Ave"
+        assert location.city == "Indoor City"
+        assert location.state_province == "TX"
+        assert location.postal_code == "12345"
+        assert location.notes == "Professional training facility"
+        assert location.active_status == True
+
+    def test_create_location_minimal_data(self, db_session):
+        repo = LocationRepository(db_session)
+        location = repo.create(location_name="Minimal Location")
+        
+        assert location.id is not None
+        assert location.location_name == "Minimal Location"
+        assert location.address is None
+        assert location.city is None
+        assert location.state_province is None
+        assert location.postal_code is None
+        assert location.notes is None
+        assert location.active_status == True
+
+    def test_get_by_id(self, db_session, sample_location):
+        repo = LocationRepository(db_session)
+        retrieved = repo.get_by_id(sample_location.id)
+        
+        assert retrieved is not None
+        assert retrieved.id == sample_location.id
+        assert retrieved.location_name == sample_location.location_name
+
+    def test_get_by_id_nonexistent(self, db_session):
+        repo = LocationRepository(db_session)
+        retrieved = repo.get_by_id(99999)
+        
+        assert retrieved is None
 
     def test_get_all_locations(self, db_session, sample_location):
         repo = LocationRepository(db_session)
@@ -146,6 +181,65 @@ class TestLocationRepository:
         assert len(locations) >= 1
         location_ids = [l.id for l in locations]
         assert sample_location.id in location_ids
+
+    def test_get_all_active_only(self, db_session):
+        repo = LocationRepository(db_session)
+        
+        # Create active and inactive locations
+        active = repo.create("Active Location", address="123 Active St")
+        inactive = repo.create("Inactive Location", address="456 Inactive St")
+        repo.set_active_status(inactive.id, False)
+        
+        # Test active only (default)
+        active_locations = repo.get_all(active_only=True)
+        active_ids = [l.id for l in active_locations]
+        assert active.id in active_ids
+        assert inactive.id not in active_ids
+        
+        # Test all locations
+        all_locations = repo.get_all(active_only=False)
+        all_ids = [l.id for l in all_locations]
+        assert active.id in all_ids
+        assert inactive.id in all_ids
+
+    def test_update_location(self, db_session, sample_location):
+        repo = LocationRepository(db_session)
+        
+        # Update location attributes
+        sample_location.location_name = "Updated Location"
+        sample_location.address = "456 Updated St"
+        sample_location.city = "Updated City"
+        sample_location.state_province = "CA"
+        sample_location.postal_code = "54321"
+        sample_location.notes = "Updated facility"
+        
+        updated = repo.update(sample_location)
+        
+        assert updated.id == sample_location.id
+        assert updated.location_name == "Updated Location"
+        assert updated.address == "456 Updated St"
+        assert updated.city == "Updated City"
+        assert updated.state_province == "CA"
+        assert updated.postal_code == "54321"
+        assert updated.notes == "Updated facility"
+
+    def test_set_active_status(self, db_session, sample_location):
+        repo = LocationRepository(db_session)
+        
+        # Deactivate location
+        deactivated = repo.set_active_status(sample_location.id, False)
+        assert deactivated is not None
+        assert deactivated.active_status == False
+        
+        # Reactivate location
+        reactivated = repo.set_active_status(sample_location.id, True)
+        assert reactivated is not None
+        assert reactivated.active_status == True
+
+    def test_set_active_status_nonexistent(self, db_session):
+        repo = LocationRepository(db_session)
+        result = repo.set_active_status(99999, False)
+        assert result is None
 
 class TestRatingRepository:
     def test_create_rating(self, db_session, sample_instructor, sample_course):

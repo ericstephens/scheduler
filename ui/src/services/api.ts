@@ -2,6 +2,7 @@ import axios from 'axios'
 import type { Instructor, CreateInstructorRequest, UpdateInstructorRequest, InstructorStats } from '@/types/instructor'
 import type { Course, CreateCourseRequest, UpdateCourseRequest, CourseSearchRequest } from '@/types/course'
 import type { CourseSession, CreateCourseSessionRequest, UpdateCourseSessionRequest, SessionSearchRequest, SessionStatus } from '@/types/courseSession'
+import type { Location, CreateLocationRequest, UpdateLocationRequest, LocationSearchRequest } from '@/types/location'
 
 const api = axios.create({
   baseURL: '/api',
@@ -187,6 +188,51 @@ export const courseSessionApi = {
   // Create session day
   createSessionDay: async (sessionId: number, data: any) => {
     const response = await api.post(`/sessions/${sessionId}/days`, data)
+    return response.data
+  },
+}
+
+export const locationApi = {
+  // Get all locations
+  getAll: async (activeOnly = true): Promise<Location[]> => {
+    const response = await api.get('/locations/', {
+      params: { active_only: activeOnly }
+    })
+    return response.data
+  },
+
+  // Get location by ID
+  getById: async (id: number): Promise<Location> => {
+    const response = await api.get(`/locations/${id}`)
+    return response.data
+  },
+
+  // Create new location
+  create: async (data: CreateLocationRequest): Promise<Location> => {
+    const response = await api.post('/locations/', data)
+    return response.data
+  },
+
+  // Update location
+  update: async (id: number, data: UpdateLocationRequest): Promise<Location> => {
+    const response = await api.put(`/locations/${id}`, data)
+    return response.data
+  },
+
+  // Update location status (activate/deactivate)
+  updateStatus: async (id: number, active: boolean): Promise<{ message: string }> => {
+    const response = await api.patch(`/locations/${id}/status?active=${active}`)
+    return response.data
+  },
+
+  // Delete location (soft delete by setting active to false)
+  delete: async (id: number): Promise<{ message: string }> => {
+    return locationApi.updateStatus(id, false)
+  },
+
+  // Search locations
+  search: async (searchRequest: LocationSearchRequest): Promise<Location[]> => {
+    const response = await api.post('/locations/search', searchRequest)
     return response.data
   },
 }
