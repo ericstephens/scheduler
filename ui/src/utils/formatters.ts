@@ -33,3 +33,9 @@ export const formatPhoneNumber = (phone?: string): string => {
 export const getInitials = (firstName: string, lastName: string): string => {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 }
+
+export const formatDuration = (days: number): string => {
+  // Show whole numbers without decimals, decimals with one decimal place
+  const formatted = days % 1 === 0 ? days.toString() : days.toFixed(1)
+  return `${formatted} day${days !== 1 ? 's' : ''}`
+}

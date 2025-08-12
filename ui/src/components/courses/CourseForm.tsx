@@ -11,7 +11,7 @@ const courseSchema = z.object({
   course_name: z.string().min(1, 'Course name is required').max(200, 'Course name must be less than 200 characters'),
   course_code: z.string().min(1, 'Course code is required').max(50, 'Course code must be less than 50 characters'),
   description: z.string().optional(),
-  duration_days: z.number().min(1, 'Duration must be at least 1 day').max(365, 'Duration must be less than 365 days'),
+  duration_days: z.number().min(0.5, 'Duration must be at least 0.5 days').max(365, 'Duration must be less than 365 days'),
 })
 
 type CourseFormData = z.infer<typeof courseSchema>
@@ -41,7 +41,7 @@ export default function CourseForm({
       course_name: course?.course_name || '',
       course_code: course?.course_code || '',
       description: course?.description || '',
-      duration_days: course?.duration_days || 1,
+      duration_days: course?.duration_days || 0.5,
     },
   })
 
@@ -89,10 +89,11 @@ export default function CourseForm({
         type="number"
         {...register('duration_days', { valueAsNumber: true })}
         error={errors.duration_days?.message}
-        placeholder="5"
+        placeholder="1.5"
         required
-        min="1"
+        min="0.5"
         max="365"
+        step="0.5"
       />
 
       <div>

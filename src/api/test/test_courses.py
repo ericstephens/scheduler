@@ -40,12 +40,95 @@ class TestCourseEndpoints:
         course_data = {
             "course_name": "Test Course",
             "course_code": "TEST01",
-            "duration_days": 0  # Invalid duration
+            "duration_days": 0.25  # Invalid duration (less than 0.5)
         }
         
         response = client.post("/api/v1/courses/", json=course_data)
         
         assert response.status_code == 422
+
+    def test_create_half_day_course(self, client: TestClient):
+        """Test creating a course with half-day duration."""
+        course_data = {
+            "course_name": "Morning Safety Brief",
+            "course_code": "MSB-HALF",
+            "description": "Half-day morning safety briefing",
+            "duration_days": 0.5
+        }
+        
+        response = client.post("/api/v1/courses/", json=course_data)
+        
+        assert response.status_code == 201
+        data = response.json()
+        assert data["course_name"] == "Morning Safety Brief"
+        assert data["course_code"] == "MSB-HALF"
+        assert data["duration_days"] == 0.5
+        assert data["active_status"] == True
+        assert "id" in data
+
+    def test_create_one_and_half_day_course(self, client: TestClient):
+        """Test creating a course with 1.5 day duration."""
+        course_data = {
+            "course_name": "Extended Firearms Training",
+            "course_code": "EFT-1.5",
+            "description": "One and half day firearms training",
+            "duration_days": 1.5
+        }
+        
+        response = client.post("/api/v1/courses/", json=course_data)
+        
+        assert response.status_code == 201
+        data = response.json()
+        assert data["duration_days"] == 1.5
+
+    def test_create_various_decimal_duration_courses(self, client: TestClient):
+        """Test creating courses with various decimal durations."""
+        test_cases = [
+            {"duration": 0.5, "name": "Half Day", "code": "HALF-01"},
+            {"duration": 1.5, "name": "One and Half Day", "code": "ONE-HALF-01"},
+            {"duration": 2.5, "name": "Two and Half Day", "code": "TWO-HALF-01"},
+            {"duration": 3.5, "name": "Three and Half Day", "code": "THREE-HALF-01"},
+        ]
+        
+        for test_case in test_cases:
+            course_data = {
+                "course_name": f"{test_case['name']} Course",
+                "course_code": test_case['code'],
+                "duration_days": test_case['duration']
+            }
+            
+            response = client.post("/api/v1/courses/", json=course_data)
+            
+            assert response.status_code == 201
+            data = response.json()
+            assert data["duration_days"] == test_case['duration']
+
+    def test_update_course_to_half_day(self, client: TestClient, sample_course):
+        """Test updating an existing course to have half-day duration."""
+        update_data = {
+            "duration_days": 0.5
+        }
+        
+        response = client.put(f"/api/v1/courses/{sample_course.id}", json=update_data)
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert data["duration_days"] == 0.5
+        assert data["id"] == sample_course.id
+
+    def test_invalid_decimal_duration_too_small(self, client: TestClient):
+        """Test that durations less than 0.5 are rejected."""
+        course_data = {
+            "course_name": "Invalid Course",
+            "course_code": "INV-01",
+            "duration_days": 0.25  # Too small
+        }
+        
+        response = client.post("/api/v1/courses/", json=course_data)
+        
+        assert response.status_code == 422
+        error_detail = response.json()["detail"]
+        assert any("greater than or equal to 0.5" in str(error) for error in error_detail)
 
     def test_list_courses(self, client: TestClient, sample_course):
         """Test listing courses."""

@@ -1,6 +1,6 @@
 import { BookOpen, Clock, MoreVertical, Edit, Trash2, Code } from 'lucide-react'
 import type { Course } from '@/types/course'
-import { formatDate } from '@/utils/formatters'
+import { formatDate, formatDuration } from '@/utils/formatters'
 import { cn } from '@/utils/cn'
 import { useState, useRef, useEffect } from 'react'
 import Button from '@/components/ui/Button'
@@ -79,7 +79,7 @@ export default function CourseCard({
             <div className="mt-2 space-y-1">
               <div className="flex items-center text-sm text-gray-600">
                 <Clock className="h-4 w-4 mr-2" />
-                {course.duration_days} day{course.duration_days !== 1 ? 's' : ''}
+                {formatDuration(course.duration_days)}
               </div>
             </div>
             

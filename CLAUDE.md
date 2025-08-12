@@ -144,3 +144,6 @@ Use podman commands instead of docker:
 - memory
 - never use sqlite
 - always create additional unit test cases at the api and db layers as functionality expands
+- create test cases in each layer to validate the half day functionality. no adhoc curl commands for testing
+- i'll remind you again that if we need to test functionality, tests should be written for the respective layer (api, db). no random curl commands. this was a previous project memory so I need you to, um, remember it
+- make sure when running test cases you start with the db then do the api

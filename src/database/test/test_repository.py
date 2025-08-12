@@ -126,6 +126,74 @@ class TestCourseRepository:
         updated = repo.set_active_status(sample_course.id, False)
         assert updated.active_status == False
 
+    def test_create_half_day_course(self, db_session):
+        """Test creating a course with half-day duration."""
+        repo = CourseRepository(db_session)
+        course = repo.create(
+            course_name="Morning Safety Brief",
+            course_code="MSB-HALF",
+            description="Half-day morning safety briefing",
+            duration_days=0.5
+        )
+        
+        assert course.id is not None
+        assert course.course_name == "Morning Safety Brief"
+        assert course.course_code == "MSB-HALF"
+        assert course.duration_days == 0.5
+        assert course.active_status == True
+
+    def test_create_one_and_half_day_course(self, db_session):
+        """Test creating a course with 1.5 day duration."""
+        repo = CourseRepository(db_session)
+        course = repo.create(
+            course_name="Extended Firearms Training",
+            course_code="EFT-1.5",
+            description="One and half day firearms training",
+            duration_days=1.5
+        )
+        
+        assert course.id is not None
+        assert course.duration_days == 1.5
+
+    def test_create_multiple_decimal_day_course(self, db_session):
+        """Test creating courses with various decimal day durations."""
+        repo = CourseRepository(db_session)
+        
+        # Test 0.5 days
+        course_half = repo.create(
+            course_name="Half Day Course",
+            course_code="HALF-01",
+            duration_days=0.5
+        )
+        assert course_half.duration_days == 0.5
+        
+        # Test 1.5 days
+        course_one_half = repo.create(
+            course_name="One and Half Day Course",
+            course_code="ONE-HALF-01",
+            duration_days=1.5
+        )
+        assert course_one_half.duration_days == 1.5
+        
+        # Test 2.5 days
+        course_two_half = repo.create(
+            course_name="Two and Half Day Course",
+            course_code="TWO-HALF-01",
+            duration_days=2.5
+        )
+        assert course_two_half.duration_days == 2.5
+
+    def test_update_course_to_half_day(self, db_session, sample_course):
+        """Test updating an existing course to have half-day duration."""
+        repo = CourseRepository(db_session)
+        
+        # Update the duration to half day
+        sample_course.duration_days = 0.5
+        updated_course = repo.update(sample_course)
+        
+        assert updated_course.duration_days == 0.5
+        assert updated_course.id == sample_course.id
+
 class TestLocationRepository:
     def test_create_location(self, db_session):
         repo = LocationRepository(db_session)

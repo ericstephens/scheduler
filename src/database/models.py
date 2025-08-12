@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum as PyEnum
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Enum, Time, Date
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Enum, Time, Date, Float
 from sqlalchemy.orm import relationship
 from .connection import Base
 
@@ -49,7 +49,7 @@ class Course(Base):
     course_name = Column(String(200), nullable=False)
     course_code = Column(String(50), unique=True, nullable=False, index=True)
     description = Column(Text)
-    duration_days = Column(Integer, nullable=False)
+    duration_days = Column(Float, nullable=False)
     active_status = Column(Boolean, default=True, nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     
