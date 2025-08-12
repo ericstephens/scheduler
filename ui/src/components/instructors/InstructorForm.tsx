@@ -34,7 +34,7 @@ export default function InstructorForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid, isDirty },
+    formState: { errors, isValid },
     reset,
   } = useForm<InstructorFormData>({
     resolver: zodResolver(instructorSchema),

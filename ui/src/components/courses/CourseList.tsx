@@ -1,23 +1,23 @@
 import { useState } from 'react'
-import { Search, Plus, Users, Filter } from 'lucide-react'
-import type { Instructor } from '@/types/instructor'
-import InstructorCard from './InstructorCard'
+import { Search, Plus, BookOpen, Filter } from 'lucide-react'
+import type { Course } from '@/types/course'
+import CourseCard from './CourseCard'
 import Button from '@/components/ui/Button'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
-interface InstructorListProps {
-  instructors: Instructor[]
+interface CourseListProps {
+  courses: Course[]
   onCreateNew: () => void
-  onEdit: (instructor: Instructor) => void
-  onDelete: (instructor: Instructor) => void
-  onToggleStatus: (instructor: Instructor) => void
+  onEdit: (course: Course) => void
+  onDelete: (course: Course) => void
+  onToggleStatus: (course: Course) => void
   isLoading?: boolean
   showInactive?: boolean
   onToggleInactive: (show: boolean) => void
 }
 
-export default function InstructorList({
-  instructors,
+export default function CourseList({
+  courses,
   onCreateNew,
   onEdit,
   onDelete,
@@ -25,29 +25,27 @@ export default function InstructorList({
   isLoading = false,
   showInactive = false,
   onToggleInactive,
-}: InstructorListProps) {
+}: CourseListProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredInstructors = instructors.filter((instructor) => {
+  const filteredCourses = courses.filter((course) => {
     const searchTerm = searchQuery.toLowerCase()
     return (
-      instructor.first_name.toLowerCase().includes(searchTerm) ||
-      instructor.last_name.toLowerCase().includes(searchTerm) ||
-      instructor.email.toLowerCase().includes(searchTerm) ||
-      instructor.call_sign?.toLowerCase().includes(searchTerm) ||
-      instructor.phone_number?.includes(searchTerm)
+      course.course_name.toLowerCase().includes(searchTerm) ||
+      course.course_code.toLowerCase().includes(searchTerm) ||
+      course.description?.toLowerCase().includes(searchTerm)
     )
   })
 
-  const activeCount = instructors.filter(i => i.active_status).length
-  const inactiveCount = instructors.filter(i => !i.active_status).length
+  const activeCount = courses.filter(c => c.active_status).length
+  const inactiveCount = courses.filter(c => !c.active_status).length
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600">Loading instructors...</p>
+          <p className="mt-4 text-gray-600">Loading courses...</p>
         </div>
       </div>
     )
@@ -58,15 +56,15 @@ export default function InstructorList({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Instructors</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Courses</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Manage your instructor database
+            Manage your course catalog
           </p>
         </div>
         
         <Button onClick={onCreateNew} className="flex items-center">
           <Plus className="h-4 w-4 mr-2" />
-          Add Instructor
+          Add Course
         </Button>
       </div>
 
@@ -74,9 +72,9 @@ export default function InstructorList({
       <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center space-x-6">
           <div className="flex items-center">
-            <Users className="h-5 w-5 text-gray-400 mr-2" />
+            <BookOpen className="h-5 w-5 text-gray-400 mr-2" />
             <span className="text-sm font-medium text-gray-900">
-              {instructors.length} Total
+              {courses.length} Total
             </span>
           </div>
           <div className="text-sm text-gray-600">
@@ -104,7 +102,7 @@ export default function InstructorList({
         </div>
         <input
           type="text"
-          placeholder="Search instructors..."
+          placeholder="Search courses..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -112,31 +110,31 @@ export default function InstructorList({
       </div>
 
       {/* Results */}
-      {filteredInstructors.length === 0 ? (
+      {filteredCourses.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchQuery ? 'No matching instructors' : 'No instructors found'}
+            {searchQuery ? 'No matching courses' : 'No courses found'}
           </h3>
           <p className="text-gray-600 mb-6">
             {searchQuery 
               ? 'Try adjusting your search terms' 
-              : 'Get started by adding your first instructor'
+              : 'Get started by adding your first course'
             }
           </p>
           {!searchQuery && (
             <Button onClick={onCreateNew}>
               <Plus className="h-4 w-4 mr-2" />
-              Add First Instructor
+              Add First Course
             </Button>
           )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredInstructors.map((instructor) => (
-            <InstructorCard
-              key={instructor.id}
-              instructor={instructor}
+          {filteredCourses.map((course) => (
+            <CourseCard
+              key={course.id}
+              course={course}
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleStatus={onToggleStatus}
@@ -145,9 +143,9 @@ export default function InstructorList({
         </div>
       )}
 
-      {searchQuery && filteredInstructors.length > 0 && (
+      {searchQuery && filteredCourses.length > 0 && (
         <div className="text-sm text-gray-600 text-center">
-          Showing {filteredInstructors.length} of {instructors.length} instructors
+          Showing {filteredCourses.length} of {courses.length} courses
         </div>
       )}
     </div>

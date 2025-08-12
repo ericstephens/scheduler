@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { instructorApi } from '@/services/api'
-import type { Instructor, CreateInstructorRequest, UpdateInstructorRequest } from '@/types/instructor'
+import type { CreateInstructorRequest, UpdateInstructorRequest } from '@/types/instructor'
 import toast from 'react-hot-toast'
 
 export const useInstructors = (activeOnly = true) => {

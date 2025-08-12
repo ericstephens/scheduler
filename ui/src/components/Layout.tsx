@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Users, Calendar, MapPin, Settings, BookOpen } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
@@ -7,14 +8,15 @@ interface LayoutProps {
 }
 
 const navigation = [
-  { name: 'Instructors', href: '/instructors', icon: Users, current: true },
-  { name: 'Courses', href: '/courses', icon: BookOpen, current: false },
-  { name: 'Sessions', href: '/sessions', icon: Calendar, current: false },
-  { name: 'Locations', href: '/locations', icon: MapPin, current: false },
-  { name: 'Settings', href: '/settings', icon: Settings, current: false },
+  { name: 'Instructors', href: '/instructors', icon: Users },
+  { name: 'Courses', href: '/courses', icon: BookOpen },
+  { name: 'Sessions', href: '/sessions', icon: Calendar },
+  { name: 'Locations', href: '/locations', icon: MapPin },
+  { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
 export default function Layout({ children }: LayoutProps) {
+  const location = useLocation()
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -34,12 +36,13 @@ export default function Layout({ children }: LayoutProps) {
           <div className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon
+              const isActive = location.pathname === item.href
               return (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className={cn(
-                    item.current
+                    isActive
                       ? 'bg-primary-50 border-primary-500 text-primary-700'
                       : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900',
                     'group border-l-4 px-3 py-2 flex items-center text-sm font-medium transition-colors'
@@ -47,14 +50,14 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   <Icon
                     className={cn(
-                      item.current
+                      isActive
                         ? 'text-primary-500'
                         : 'text-gray-400 group-hover:text-gray-500',
                       'mr-3 h-5 w-5 transition-colors'
                     )}
                   />
                   {item.name}
-                </a>
+                </Link>
               )
             })}
           </div>

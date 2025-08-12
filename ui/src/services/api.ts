@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { Instructor, CreateInstructorRequest, UpdateInstructorRequest, InstructorStats } from '@/types/instructor'
+import type { Course, CreateCourseRequest, UpdateCourseRequest, CourseSearchRequest } from '@/types/course'
 
 const api = axios.create({
   baseURL: '/api',
@@ -80,6 +81,57 @@ export const instructorApi = {
     const response = await api.get('/instructors/search', {
       params: { q: query }
     })
+    return response.data
+  },
+}
+
+export const courseApi = {
+  // Get all courses
+  getAll: async (activeOnly = true): Promise<Course[]> => {
+    const response = await api.get('/courses/', {
+      params: { active_only: activeOnly }
+    })
+    return response.data
+  },
+
+  // Get course by ID
+  getById: async (id: number): Promise<Course> => {
+    const response = await api.get(`/courses/${id}`)
+    return response.data
+  },
+
+  // Get course by code
+  getByCode: async (code: string): Promise<Course> => {
+    const response = await api.get(`/courses/code/${code}`)
+    return response.data
+  },
+
+  // Create new course
+  create: async (data: CreateCourseRequest): Promise<Course> => {
+    const response = await api.post('/courses/', data)
+    return response.data
+  },
+
+  // Update course
+  update: async (id: number, data: UpdateCourseRequest): Promise<Course> => {
+    const response = await api.put(`/courses/${id}`, data)
+    return response.data
+  },
+
+  // Update course status (activate/deactivate)
+  updateStatus: async (id: number, active: boolean): Promise<{ message: string }> => {
+    const response = await api.patch(`/courses/${id}/status`, { active })
+    return response.data
+  },
+
+  // Delete course (soft delete by setting active to false)
+  delete: async (id: number): Promise<{ message: string }> => {
+    return courseApi.updateStatus(id, false)
+  },
+
+  // Search courses
+  search: async (searchRequest: CourseSearchRequest): Promise<Course[]> => {
+    const response = await api.post('/courses/search', searchRequest)
     return response.data
   },
 }
