@@ -70,8 +70,6 @@ def sample_location(db_session):
         city="Training City",
         state_province="TX",
         postal_code="12345",
-        location_type="classroom",
-        capacity=20,
         notes="Primary training facility"
     )
     db_session.add(location)

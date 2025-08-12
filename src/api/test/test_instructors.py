@@ -146,7 +146,6 @@ class TestInstructorEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert "total_assignments" in data
-        assert "pay_eligible_assignments" in data
         assert "total_course_ratings" in data
         assert "cleared_courses" in data
         assert all(isinstance(value, int) for value in data.values())

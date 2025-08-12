@@ -95,17 +95,13 @@ class TestLocationModel:
         location = Location(
             location_name="Outdoor Range",
             address="456 Range Rd",
-            city="Range City",
-            location_type="range",
-            capacity=15
+            city="Range City"
         )
         db_session.add(location)
         db_session.commit()
         
         assert location.id is not None
         assert location.location_name == "Outdoor Range"
-        assert location.location_type == "range"
-        assert location.capacity == 15
         assert location.active_status == True
 
 class TestInstructorCourseRating:
@@ -138,8 +134,7 @@ class TestCourseSession:
             course_id=sample_course.id,
             session_name="Spring 2024 Session",
             start_date=date(2024, 3, 1),
-            end_date=date(2024, 3, 3),
-            total_students=15
+            end_date=date(2024, 3, 3)
         )
         db_session.add(session)
         db_session.commit()
@@ -205,14 +200,12 @@ class TestInstructorAssignment:
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
             assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True,
             notes="Lead instructor assignment"
         )
         db_session.add(assignment)
         db_session.commit()
         
         assert assignment.id is not None
-        assert assignment.pay_eligible == True
         assert assignment.assignment_status == AssignmentStatus.ASSIGNED
         assert assignment.notes == "Lead instructor assignment"
 
@@ -242,8 +235,7 @@ class TestInstructorAssignment:
         assignment = InstructorAssignment(
             session_day_id=session_day.id,
             instructor_id=sample_instructor.id,
-            assignment_type=SessionType.FULL_DAY,
-            pay_eligible=True
+            assignment_type=SessionType.FULL_DAY
         )
         db_session.add(assignment)
         db_session.commit()

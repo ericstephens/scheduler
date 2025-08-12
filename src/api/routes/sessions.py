@@ -44,7 +44,6 @@ async def create_session(
             session_name=session.session_name,
             start_date=session.start_date,
             end_date=session.end_date,
-            total_students=session.total_students,
             notes=session.notes
         )
         return db_session_obj

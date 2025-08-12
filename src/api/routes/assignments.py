@@ -11,7 +11,7 @@ from src.database.connection import get_db_session
 from src.database.repository import AssignmentRepository, InstructorRepository
 from src.database.models import AssignmentStatus, SessionDay, SessionType
 from src.database.utils import (
-    check_instructor_availability, calculate_pay_eligibility,
+    check_instructor_availability,
     get_instructor_conflicts
 )
 from ..schemas.assignment import (
@@ -62,13 +62,6 @@ async def create_assignment(
             detail=f"Instructor has {len(conflicts)} conflicting assignments on this date"
         )
     
-    # Calculate pay eligibility
-    session = db.query(SessionDay).join("session").filter(
-        SessionDay.id == assignment.session_day_id
-    ).first()
-    pay_eligible = calculate_pay_eligibility(
-        db, assignment.instructor_id, session.session.course_id
-    ) if session else assignment.pay_eligible
     
     try:
         # Convert API enum to database enum
@@ -78,7 +71,6 @@ async def create_assignment(
             session_day_id=assignment.session_day_id,
             instructor_id=assignment.instructor_id,
             assignment_type=assignment_type,
-            pay_eligible=pay_eligible,
             notes=assignment.notes
         )
         return db_assignment
@@ -89,7 +81,6 @@ async def create_assignment(
 async def list_assignments(
     instructor_id: int = Query(None, description="Filter by instructor ID"),
     status: APIAssignmentStatus = Query(None, description="Filter by assignment status"),
-    pay_eligible_only: bool = Query(False, description="Filter pay eligible assignments only"),
     date_from: date = Query(None, description="Filter assignments from this date"),
     date_to: date = Query(None, description="Filter assignments to this date"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -97,9 +88,7 @@ async def list_assignments(
     repo: AssignmentRepository = Depends(get_assignment_repo)
 ):
     """List all assignments with optional filtering."""
-    if pay_eligible_only:
-        assignments = repo.get_pay_eligible_assignments()
-    elif instructor_id:
+    if instructor_id:
         assignments = repo.get_instructor_assignments(instructor_id)
     elif date_from and date_to:
         assignments = repo.get_assignments_by_date_range(date_from, date_to)
@@ -219,16 +208,11 @@ async def create_bulk_assignments(
         
         created_assignments = []
         for session_day in session_days:
-            # Calculate pay eligibility for each assignment
-            pay_eligible = calculate_pay_eligibility(
-                db, bulk_assignment.instructor_id, session_day.session.course_id
-            )
             
             assignment = repo.create_assignment(
                 session_day_id=session_day.id,
                 instructor_id=bulk_assignment.instructor_id,
                 assignment_type=assignment_type,
-                pay_eligible=pay_eligible,
                 notes=bulk_assignment.notes
             )
             created_assignments.append(assignment)

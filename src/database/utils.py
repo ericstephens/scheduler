@@ -114,11 +114,6 @@ def get_instructor_stats(db: Session, instructor_id: int) -> dict:
         InstructorAssignment.instructor_id == instructor_id
     ).count()
     
-    pay_eligible_assignments = db.query(InstructorAssignment).filter(
-        InstructorAssignment.instructor_id == instructor_id,
-        InstructorAssignment.pay_eligible == True
-    ).count()
-    
     total_ratings = db.query(InstructorCourseRating).filter(
         InstructorCourseRating.instructor_id == instructor_id
     ).count()
@@ -130,7 +125,6 @@ def get_instructor_stats(db: Session, instructor_id: int) -> dict:
     
     return {
         "total_assignments": total_assignments,
-        "pay_eligible_assignments": pay_eligible_assignments,
         "total_course_ratings": total_ratings,
         "cleared_courses": cleared_ratings
     }

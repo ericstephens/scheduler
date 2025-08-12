@@ -33,6 +33,7 @@ class Instructor(Base):
     last_name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
     phone_number = Column(String(20))
+    call_sign = Column(String(50))
     active_status = Column(Boolean, default=True, nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     notes = Column(Text)
@@ -65,8 +66,6 @@ class Location(Base):
     city = Column(String(100))
     state_province = Column(String(50))
     postal_code = Column(String(20))
-    location_type = Column(String(50))  # classroom, range, online, etc.
-    capacity = Column(Integer)
     active_status = Column(Boolean, default=True, nullable=False)
     notes = Column(Text)
     
@@ -97,7 +96,6 @@ class CourseSession(Base):
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     status = Column(Enum(SessionStatus), default=SessionStatus.SCHEDULED, nullable=False)
-    total_students = Column(Integer)
     notes = Column(Text)
     
     # Relationships
@@ -129,7 +127,6 @@ class InstructorAssignment(Base):
     instructor_id = Column(Integer, ForeignKey("instructors.id"), nullable=False)
     assignment_type = Column(Enum(SessionType), nullable=False)
     assignment_status = Column(Enum(AssignmentStatus), default=AssignmentStatus.ASSIGNED, nullable=False)
-    pay_eligible = Column(Boolean, default=False, nullable=False)
     created_date = Column(DateTime, default=datetime.utcnow, nullable=False)
     notes = Column(Text)
     

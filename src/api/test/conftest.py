@@ -86,8 +86,6 @@ def sample_location(test_db_session):
         city="Training City",
         state_province="TX",
         postal_code="12345",
-        location_type="classroom",
-        capacity=20,
         notes="Primary training facility"
     )
     test_db_session.add(location)
@@ -118,7 +116,6 @@ def sample_session(test_db_session, sample_course):
         session_name="Test Session",
         start_date=date(2024, 12, 1),
         end_date=date(2024, 12, 3),
-        total_students=15,
         status=SessionStatus.SCHEDULED
     )
     test_db_session.add(session)
@@ -151,7 +148,6 @@ def sample_assignment(test_db_session, sample_session_day, sample_instructor):
         session_day_id=sample_session_day.id,
         instructor_id=sample_instructor.id,
         assignment_type=SessionType.FULL_DAY,
-        pay_eligible=True,
         assignment_status=AssignmentStatus.ASSIGNED,
         notes="Test assignment"
     )

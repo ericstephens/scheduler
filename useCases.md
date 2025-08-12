@@ -1,4 +1,13 @@
+
+# cleanup
+1. add "call_sign" to Instructor
+2. on location, remove location_type and capacity
+3. on CourseSession, remove total_students
+4. on InstructorAssignment remove pay_eligible
+5. 
+
+# expansion
 1. as an administrator, I can maintain (add, change, delete) a list of instructors and course offerings
 2. as an administrator, I can add a course offering to a schedule over one or more days
-3. as an instructor, I can add myself to a particular day of a scheduled course offering
+3. as an instructor, I can add / change / remove myself to a particular day of a scheduled course offering
 4. as an admin, I can maintain the observe, co-teach, cleared status between an instructor and a course offering

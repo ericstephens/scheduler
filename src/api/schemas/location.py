@@ -7,8 +7,6 @@ class LocationBase(BaseModel):
     city: Optional[str] = Field(None, max_length=100)
     state_province: Optional[str] = Field(None, max_length=50)
     postal_code: Optional[str] = Field(None, max_length=20)
-    location_type: Optional[str] = Field(None, max_length=50)
-    capacity: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
 
 class LocationCreate(LocationBase):
@@ -20,8 +18,6 @@ class LocationUpdate(BaseModel):
     city: Optional[str] = Field(None, max_length=100)
     state_province: Optional[str] = Field(None, max_length=50)
     postal_code: Optional[str] = Field(None, max_length=20)
-    location_type: Optional[str] = Field(None, max_length=50)
-    capacity: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
     active_status: Optional[bool] = None
 
@@ -35,5 +31,4 @@ class LocationResponse(LocationBase):
 class LocationSearchRequest(BaseModel):
     name: Optional[str] = None
     city: Optional[str] = None
-    location_type: Optional[str] = None
     active_only: bool = True

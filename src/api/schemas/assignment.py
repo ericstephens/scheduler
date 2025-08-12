@@ -14,7 +14,6 @@ class InstructorAssignmentBase(BaseModel):
     session_day_id: int
     instructor_id: int
     assignment_type: SessionType
-    pay_eligible: bool = False
     notes: Optional[str] = None
 
 class InstructorAssignmentCreate(InstructorAssignmentBase):
@@ -23,7 +22,6 @@ class InstructorAssignmentCreate(InstructorAssignmentBase):
 class InstructorAssignmentUpdate(BaseModel):
     assignment_type: Optional[SessionType] = None
     assignment_status: Optional[AssignmentStatus] = None
-    pay_eligible: Optional[bool] = None
     notes: Optional[str] = None
 
 class InstructorAssignmentResponse(InstructorAssignmentBase):

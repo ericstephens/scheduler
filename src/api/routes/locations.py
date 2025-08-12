@@ -30,8 +30,6 @@ async def create_location(
             city=location.city,
             state_province=location.state_province,
             postal_code=location.postal_code,
-            location_type=location.location_type,
-            capacity=location.capacity,
             notes=location.notes
         )
         return db_location
@@ -41,7 +39,6 @@ async def create_location(
 @router.get("/", response_model=List[LocationResponse])
 async def list_locations(
     active_only: bool = Query(True, description="Filter active locations only"),
-    location_type: Optional[str] = Query(None, description="Filter by location type"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     repo: LocationRepository = Depends(get_location_repo)
@@ -49,10 +46,6 @@ async def list_locations(
     """List all locations with optional filtering."""
     locations = repo.get_all(active_only)
     
-    # Filter by type if provided
-    if location_type:
-        locations = [loc for loc in locations 
-                    if loc.location_type and location_type.lower() in loc.location_type.lower()]
     
     # Apply pagination
     return locations[skip:skip + limit]
@@ -121,10 +114,5 @@ async def search_locations(
         locations = [loc for loc in locations 
                     if loc.city and city_lower in loc.city.lower()]
     
-    # Filter by type if provided
-    if search_request.location_type:
-        type_lower = search_request.location_type.lower()
-        locations = [loc for loc in locations 
-                    if loc.location_type and type_lower in loc.location_type.lower()]
     
     return locations

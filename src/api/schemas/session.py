@@ -18,7 +18,6 @@ class CourseSessionBase(BaseModel):
     session_name: str = Field(..., min_length=1, max_length=200)
     start_date: date
     end_date: date
-    total_students: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
 
 class CourseSessionCreate(CourseSessionBase):
@@ -29,7 +28,6 @@ class CourseSessionUpdate(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     status: Optional[SessionStatus] = None
-    total_students: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
 
 class CourseSessionResponse(CourseSessionBase):
