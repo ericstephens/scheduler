@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { Instructor, CreateInstructorRequest, UpdateInstructorRequest, InstructorStats } from '@/types/instructor'
 import type { Course, CreateCourseRequest, UpdateCourseRequest, CourseSearchRequest } from '@/types/course'
+import type { CourseSession, CreateCourseSessionRequest, UpdateCourseSessionRequest, SessionSearchRequest, SessionStatus } from '@/types/courseSession'
 
 const api = axios.create({
   baseURL: '/api',
@@ -132,6 +133,60 @@ export const courseApi = {
   // Search courses
   search: async (searchRequest: CourseSearchRequest): Promise<Course[]> => {
     const response = await api.post('/courses/search', searchRequest)
+    return response.data
+  },
+}
+
+export const courseSessionApi = {
+  // Get all sessions
+  getAll: async (status?: SessionStatus, courseId?: number): Promise<CourseSession[]> => {
+    const params = new URLSearchParams()
+    if (status) params.append('status', status)
+    if (courseId) params.append('course_id', courseId.toString())
+    
+    const response = await api.get(`/sessions/${params.toString() ? '?' + params.toString() : ''}`)
+    return response.data
+  },
+
+  // Get session by ID
+  getById: async (id: number): Promise<CourseSession> => {
+    const response = await api.get(`/sessions/${id}`)
+    return response.data
+  },
+
+  // Create new session
+  create: async (data: CreateCourseSessionRequest): Promise<CourseSession> => {
+    const response = await api.post('/sessions/', data)
+    return response.data
+  },
+
+  // Update session
+  update: async (id: number, data: UpdateCourseSessionRequest): Promise<CourseSession> => {
+    const response = await api.put(`/sessions/${id}`, data)
+    return response.data
+  },
+
+  // Update session status
+  updateStatus: async (id: number, status: SessionStatus): Promise<{ message: string }> => {
+    const response = await api.patch(`/sessions/${id}/status?status=${status}`)
+    return response.data
+  },
+
+  // Search sessions
+  search: async (searchRequest: SessionSearchRequest): Promise<CourseSession[]> => {
+    const response = await api.post('/sessions/search', searchRequest)
+    return response.data
+  },
+
+  // Get session days
+  getSessionDays: async (sessionId: number) => {
+    const response = await api.get(`/sessions/${sessionId}/days`)
+    return response.data
+  },
+
+  // Create session day
+  createSessionDay: async (sessionId: number, data: any) => {
+    const response = await api.post(`/sessions/${sessionId}/days`, data)
     return response.data
   },
 }

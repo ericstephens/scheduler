@@ -114,8 +114,8 @@ def sample_session(test_db_session, sample_course):
     session = CourseSession(
         course_id=sample_course.id,
         session_name="Test Session",
-        start_date=date(2024, 12, 1),
-        end_date=date(2024, 12, 3),
+        start_date=date(2025, 12, 1),
+        end_date=date(2025, 12, 3),
         status=SessionStatus.SCHEDULED
     )
     test_db_session.add(session)
@@ -130,7 +130,7 @@ def sample_session_day(test_db_session, sample_session, sample_location):
     session_day = CourseSessionDay(
         session_id=sample_session.id,
         day_number=1,
-        date=date(2024, 12, 1),
+        date=date(2025, 12, 1),
         location_id=sample_location.id,
         start_time=time(9, 0),
         end_time=time(17, 0),

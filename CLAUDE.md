@@ -142,3 +142,5 @@ Use podman commands instead of docker:
 - **Management**: `./manage.sh start|stop|restart`
 - **Container**: `podman-compose up -d` for PostgreSQL
 - memory
+- never use sqlite
+- always create additional unit test cases at the api and db layers as functionality expands

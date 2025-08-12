@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast'
 import Layout from './components/Layout'
 import Instructors from './pages/Instructors'
 import Courses from './pages/Courses'
+import Sessions from './pages/Sessions'
 
 // Create a client
 const queryClient = new QueryClient({
@@ -26,6 +27,7 @@ function App() {
               <Route path="/" element={<Navigate to="/instructors" replace />} />
               <Route path="/instructors" element={<Instructors />} />
               <Route path="/courses" element={<Courses />} />
+              <Route path="/sessions" element={<Sessions />} />
             </Routes>
           </Layout>
           
