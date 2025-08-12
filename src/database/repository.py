@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from .models import (
     Instructor, Course, Location, InstructorCourseRating, 
-    ClassSession, SessionDay, InstructorAssignment,
+    CourseSession, SessionDay, InstructorAssignment,
     RatingType, SessionStatus, AssignmentStatus
 )
 
@@ -206,8 +206,8 @@ class SessionRepository:
     
     def create_session(self, course_id: int, session_name: str, start_date: date,
                       end_date: date, total_students: Optional[int] = None,
-                      notes: Optional[str] = None) -> ClassSession:
-        session = ClassSession(
+                      notes: Optional[str] = None) -> CourseSession:
+        session = CourseSession(
             course_id=course_id,
             session_name=session_name,
             start_date=start_date,
@@ -220,16 +220,16 @@ class SessionRepository:
         self.db.refresh(session)
         return session
     
-    def get_by_id(self, session_id: int) -> Optional[ClassSession]:
-        return self.db.query(ClassSession).filter(ClassSession.id == session_id).first()
+    def get_by_id(self, session_id: int) -> Optional[CourseSession]:
+        return self.db.query(CourseSession).filter(CourseSession.id == session_id).first()
     
-    def get_all(self) -> List[ClassSession]:
-        return self.db.query(ClassSession).all()
+    def get_all(self) -> List[CourseSession]:
+        return self.db.query(CourseSession).all()
     
-    def get_by_status(self, status: SessionStatus) -> List[ClassSession]:
-        return self.db.query(ClassSession).filter(ClassSession.status == status).all()
+    def get_by_status(self, status: SessionStatus) -> List[CourseSession]:
+        return self.db.query(CourseSession).filter(CourseSession.status == status).all()
     
-    def update_status(self, session_id: int, status: SessionStatus) -> Optional[ClassSession]:
+    def update_status(self, session_id: int, status: SessionStatus) -> Optional[CourseSession]:
         session = self.get_by_id(session_id)
         if session:
             session.status = status

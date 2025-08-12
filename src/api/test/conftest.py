@@ -113,7 +113,7 @@ def sample_rating(test_db_session, sample_instructor, sample_course):
 def sample_session(test_db_session, sample_course):
     """Create sample class session."""
     from datetime import date
-    session = ClassSession(
+    session = CourseSession(
         course_id=sample_course.id,
         session_name="Test Session",
         start_date=date(2024, 12, 1),

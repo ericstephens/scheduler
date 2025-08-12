@@ -54,7 +54,7 @@ class Course(Base):
     
     # Relationships
     instructor_ratings = relationship("InstructorCourseRating", back_populates="course")
-    class_sessions = relationship("ClassSession", back_populates="course")
+    course_sessions = relationship("CourseSession", back_populates="course")
 
 class Location(Base):
     __tablename__ = "locations"
@@ -88,8 +88,8 @@ class InstructorCourseRating(Base):
     instructor = relationship("Instructor", back_populates="course_ratings")
     course = relationship("Course", back_populates="instructor_ratings")
 
-class ClassSession(Base):
-    __tablename__ = "class_sessions"
+class CourseSession(Base):
+    __tablename__ = "course_sessions"
     
     id = Column(Integer, primary_key=True, index=True)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
@@ -101,14 +101,14 @@ class ClassSession(Base):
     notes = Column(Text)
     
     # Relationships
-    course = relationship("Course", back_populates="class_sessions")
+    course = relationship("Course", back_populates="course_sessions")
     session_days = relationship("SessionDay", back_populates="session")
 
 class SessionDay(Base):
     __tablename__ = "session_days"
     
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(Integer, ForeignKey("class_sessions.id"), nullable=False)
+    session_id = Column(Integer, ForeignKey("course_sessions.id"), nullable=False)
     day_number = Column(Integer, nullable=False)  # 1, 2, 3, etc.
     date = Column(Date, nullable=False)
     location_id = Column(Integer, ForeignKey("locations.id"), nullable=False)
@@ -117,7 +117,7 @@ class SessionDay(Base):
     session_type = Column(Enum(SessionType), nullable=False)
     
     # Relationships
-    session = relationship("ClassSession", back_populates="session_days")
+    session = relationship("CourseSession", back_populates="session_days")
     location = relationship("Location", back_populates="session_days")
     instructor_assignments = relationship("InstructorAssignment", back_populates="session_day")
 

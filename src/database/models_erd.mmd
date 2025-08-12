@@ -1,0 +1,116 @@
+erDiagram
+    %% Enums
+    RatingType {
+        string OBSERVE
+        string CO_TEACH
+        string CLEARED
+    }
+    
+    SessionStatus {
+        string SCHEDULED
+        string IN_PROGRESS
+        string COMPLETED
+        string CANCELLED
+    }
+    
+    SessionType {
+        string HALF_DAY
+        string FULL_DAY
+    }
+    
+    AssignmentStatus {
+        string ASSIGNED
+        string CONFIRMED
+        string COMPLETED
+        string CANCELLED
+    }
+
+    %% Main Entities
+    Instructor {
+        int id PK
+        string first_name
+        string last_name
+        string email UK
+        string phone_number
+        boolean active_status
+        datetime created_date
+        text notes
+    }
+
+    Course {
+        int id PK
+        string course_name
+        string course_code UK
+        text description
+        int duration_days
+        boolean active_status
+        datetime created_date
+    }
+
+    Location {
+        int id PK
+        string location_name
+        string address
+        string city
+        string state_province
+        string postal_code
+        string location_type
+        int capacity
+        boolean active_status
+        text notes
+    }
+
+    InstructorCourseRating {
+        int id PK
+        int instructor_id FK
+        int course_id FK
+        enum rating
+        datetime date_assigned
+        datetime date_updated
+        text notes
+    }
+
+    CourseSession {
+        int id PK
+        int course_id FK
+        string session_name
+        date start_date
+        date end_date
+        enum status
+        int total_students
+        text notes
+    }
+
+    SessionDay {
+        int id PK
+        int session_id FK
+        int day_number
+        date date
+        int location_id FK
+        time start_time
+        time end_time
+        enum session_type
+    }
+
+    InstructorAssignment {
+        int id PK
+        int session_day_id FK
+        int instructor_id FK
+        enum assignment_type
+        enum assignment_status
+        boolean pay_eligible
+        datetime created_date
+        text notes
+    }
+
+    %% Relationships
+    Instructor ||--o{ InstructorCourseRating : "has ratings for"
+    Course ||--o{ InstructorCourseRating : "rated by instructors"
+    
+    Course ||--o{ CourseSession : "has sessions"
+    
+    CourseSession ||--o{ SessionDay : "consists of days"
+    Location ||--o{ SessionDay : "hosts"
+    
+    SessionDay ||--o{ InstructorAssignment : "has assignments"
+    Instructor ||--o{ InstructorAssignment : "assigned to"

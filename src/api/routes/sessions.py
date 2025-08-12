@@ -11,7 +11,7 @@ from src.database.repository import SessionRepository, CourseRepository, Locatio
 from src.database.models import SessionStatus, SessionDay
 from src.database.utils import validate_session_dates, validate_session_times
 from ..schemas.session import (
-    ClassSessionCreate, ClassSessionUpdate, ClassSessionResponse,
+    CourseSessionCreate, CourseSessionUpdate, CourseSessionResponse,
     SessionDayCreate, SessionDayUpdate, SessionDayResponse,
     SessionSearchRequest, SessionStatus as APISessionStatus
 )
@@ -21,9 +21,9 @@ router = APIRouter()
 def get_session_repo(db: Session = Depends(get_db_session)) -> SessionRepository:
     return SessionRepository(db)
 
-@router.post("/", response_model=ClassSessionResponse, status_code=201)
+@router.post("/", response_model=CourseSessionResponse, status_code=201)
 async def create_session(
-    session: ClassSessionCreate,
+    session: CourseSessionCreate,
     repo: SessionRepository = Depends(get_session_repo),
     db: Session = Depends(get_db_session)
 ):
@@ -51,7 +51,7 @@ async def create_session(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/", response_model=List[ClassSessionResponse])
+@router.get("/", response_model=List[CourseSessionResponse])
 async def list_sessions(
     status: APISessionStatus = Query(None, description="Filter by session status"),
     course_id: int = Query(None, description="Filter by course ID"),
@@ -74,7 +74,7 @@ async def list_sessions(
     # Apply pagination
     return sessions[skip:skip + limit]
 
-@router.get("/{session_id}", response_model=ClassSessionResponse)
+@router.get("/{session_id}", response_model=CourseSessionResponse)
 async def get_session(
     session_id: int,
     repo: SessionRepository = Depends(get_session_repo)
@@ -85,10 +85,10 @@ async def get_session(
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 
-@router.put("/{session_id}", response_model=ClassSessionResponse)
+@router.put("/{session_id}", response_model=CourseSessionResponse)
 async def update_session(
     session_id: int,
-    session_update: ClassSessionUpdate,
+    session_update: CourseSessionUpdate,
     repo: SessionRepository = Depends(get_session_repo),
     db: Session = Depends(get_db_session)
 ):
@@ -198,7 +198,7 @@ async def get_session_days(
     session_days = db.query(SessionDay).filter(SessionDay.session_id == session_id).all()
     return session_days
 
-@router.post("/search", response_model=List[ClassSessionResponse])
+@router.post("/search", response_model=List[CourseSessionResponse])
 async def search_sessions(
     search_request: SessionSearchRequest,
     repo: SessionRepository = Depends(get_session_repo)

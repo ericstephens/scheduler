@@ -13,7 +13,7 @@ class SessionType(str, Enum):
     HALF_DAY = "half_day"
     FULL_DAY = "full_day"
 
-class ClassSessionBase(BaseModel):
+class CourseSessionBase(BaseModel):
     course_id: int
     session_name: str = Field(..., min_length=1, max_length=200)
     start_date: date
@@ -21,10 +21,10 @@ class ClassSessionBase(BaseModel):
     total_students: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
 
-class ClassSessionCreate(ClassSessionBase):
+class CourseSessionCreate(CourseSessionBase):
     pass
 
-class ClassSessionUpdate(BaseModel):
+class CourseSessionUpdate(BaseModel):
     session_name: Optional[str] = Field(None, min_length=1, max_length=200)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -32,7 +32,7 @@ class ClassSessionUpdate(BaseModel):
     total_students: Optional[int] = Field(None, ge=1)
     notes: Optional[str] = None
 
-class ClassSessionResponse(ClassSessionBase):
+class CourseSessionResponse(CourseSessionBase):
     id: int
     status: SessionStatus
 

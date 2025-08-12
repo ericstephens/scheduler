@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 from datetime import date, time, datetime
 from src.database.models import (
     Instructor, Course, Location, InstructorCourseRating, 
-    ClassSession, SessionDay, InstructorAssignment,
+    CourseSession, SessionDay, InstructorAssignment,
     RatingType, SessionStatus, SessionType, AssignmentStatus
 )
 
@@ -132,9 +132,9 @@ class TestInstructorCourseRating:
         assert rating in instructor.course_ratings
         assert rating in course.instructor_ratings
 
-class TestClassSession:
+class TestCourseSession:
     def test_create_session(self, db_session, sample_course):
-        session = ClassSession(
+        session = CourseSession(
             course_id=sample_course.id,
             session_name="Spring 2024 Session",
             start_date=date(2024, 3, 1),
@@ -152,7 +152,7 @@ class TestClassSession:
 class TestSessionDay:
     def test_create_session_day(self, db_session, sample_course, sample_location):
         # First create a class session
-        session = ClassSession(
+        session = CourseSession(
             course_id=sample_course.id,
             session_name="Test Session",
             start_date=date(2024, 3, 1),
@@ -180,7 +180,7 @@ class TestSessionDay:
 class TestInstructorAssignment:
     def test_create_assignment(self, db_session, sample_course, sample_location, sample_instructor):
         # Create session and session day first
-        session = ClassSession(
+        session = CourseSession(
             course_id=sample_course.id,
             session_name="Test Session",
             start_date=date(2024, 3, 1),
@@ -218,7 +218,7 @@ class TestInstructorAssignment:
 
     def test_assignment_relationships(self, db_session, sample_course, sample_location, sample_instructor):
         # Create full assignment chain
-        session = ClassSession(
+        session = CourseSession(
             course_id=sample_course.id,
             session_name="Test Session",
             start_date=date(2024, 3, 1),
