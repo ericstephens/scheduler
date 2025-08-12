@@ -125,10 +125,10 @@ db_start() {
         podman run -d \
             --name scheduler-postgres \
             -e POSTGRES_DB=scheduler \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=postgres \
-            -p 5432:5432 \
-            postgres:15
+            -e POSTGRES_USER=scheduler_user \
+            -e POSTGRES_PASSWORD=scheduler_password \
+            -p 5434:5432 \
+            postgres:15-alpine
     else
         error "Neither podman-compose nor podman found. Please install podman."
         exit 1
