@@ -1,11 +1,11 @@
 from typing import List, Optional
-from datetime import date, datetime
+from datetime import date, datetime, time
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from .models import (
     Instructor, Course, Location, InstructorCourseRating, 
     CourseSession, CourseSessionDay, InstructorAssignment,
-    RatingType, SessionStatus, AssignmentStatus
+    RatingType, SessionStatus, AssignmentStatus, SessionType
 )
 
 class InstructorRepository:
@@ -231,6 +231,68 @@ class SessionRepository:
             self.db.commit()
             self.db.refresh(session)
         return session
+
+class CourseSessionDayRepository:
+    def __init__(self, db: Session):
+        self.db = db
+    
+    def create(self, session_id: int, day_number: int, date: date, location_id: int,
+               start_time: time, end_time: time, session_type: SessionType) -> CourseSessionDay:
+        session_day = CourseSessionDay(
+            session_id=session_id,
+            day_number=day_number,
+            date=date,
+            location_id=location_id,
+            start_time=start_time,
+            end_time=end_time,
+            session_type=session_type
+        )
+        self.db.add(session_day)
+        self.db.commit()
+        self.db.refresh(session_day)
+        return session_day
+    
+    def get_by_id(self, session_day_id: int) -> Optional[CourseSessionDay]:
+        return self.db.query(CourseSessionDay).filter(CourseSessionDay.id == session_day_id).first()
+    
+    def get_by_session_id(self, session_id: int) -> List[CourseSessionDay]:
+        return self.db.query(CourseSessionDay).filter(
+            CourseSessionDay.session_id == session_id
+        ).order_by(CourseSessionDay.day_number).all()
+    
+    def get_by_date_range(self, start_date: date, end_date: date) -> List[CourseSessionDay]:
+        return self.db.query(CourseSessionDay).filter(
+            and_(
+                CourseSessionDay.date >= start_date,
+                CourseSessionDay.date <= end_date
+            )
+        ).order_by(CourseSessionDay.date, CourseSessionDay.start_time).all()
+    
+    def get_by_location_and_date(self, location_id: int, date: date) -> List[CourseSessionDay]:
+        return self.db.query(CourseSessionDay).filter(
+            and_(
+                CourseSessionDay.location_id == location_id,
+                CourseSessionDay.date == date
+            )
+        ).order_by(CourseSessionDay.start_time).all()
+    
+    def update(self, session_day: CourseSessionDay) -> CourseSessionDay:
+        self.db.commit()
+        self.db.refresh(session_day)
+        return session_day
+    
+    def delete(self, session_day_id: int) -> bool:
+        session_day = self.get_by_id(session_day_id)
+        if session_day:
+            self.db.delete(session_day)
+            self.db.commit()
+            return True
+        return False
+    
+    def get_all(self) -> List[CourseSessionDay]:
+        return self.db.query(CourseSessionDay).order_by(
+            CourseSessionDay.date, CourseSessionDay.start_time
+        ).all()
 
 class AssignmentRepository:
     def __init__(self, db: Session):

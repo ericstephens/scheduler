@@ -1,4 +1,4 @@
-import { Calendar, Clock, MoreVertical, Edit, Trash2, Play, CheckCircle, XCircle } from 'lucide-react'
+import { Calendar, Clock, MoreVertical, Edit, Trash2, Play, CheckCircle, XCircle, CalendarDays } from 'lucide-react'
 import type { CourseSession } from '@/types/courseSession'
 import { SessionStatus } from '@/types/courseSession'
 import { formatDate } from '@/utils/formatters'
@@ -11,6 +11,7 @@ interface CourseSessionCardProps {
   onEdit: (courseSession: CourseSession) => void
   onDelete: (courseSession: CourseSession) => void
   onUpdateStatus: (courseSession: CourseSession, status: SessionStatus) => void
+  onManageDays?: (courseSession: CourseSession) => void
   courseName?: string
   courseCode?: string
 }
@@ -77,6 +78,7 @@ export default function CourseSessionCard({
   onEdit, 
   onDelete, 
   onUpdateStatus,
+  onManageDays,
   courseName,
   courseCode
 }: CourseSessionCardProps) {
@@ -107,6 +109,11 @@ export default function CourseSessionCard({
   const handleStatusChange = (status: SessionStatus) => {
     setShowDropdown(false)
     onUpdateStatus(courseSession, status)
+  }
+
+  const handleManageDaysClick = () => {
+    setShowDropdown(false)
+    onManageDays?.(courseSession)
   }
 
   const statusActions = getStatusActions(courseSession.status)
@@ -187,6 +194,16 @@ export default function CourseSessionCard({
                   <Edit className="h-4 w-4 mr-3" />
                   Edit
                 </button>
+                
+                {onManageDays && (
+                  <button
+                    onClick={handleManageDaysClick}
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
+                  >
+                    <CalendarDays className="h-4 w-4 mr-3" />
+                    Manage Days
+                  </button>
+                )}
                 
                 {statusActions.map((action, index) => {
                   const Icon = action.icon

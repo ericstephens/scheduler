@@ -11,10 +11,11 @@ import {
 import { useCourses } from '@/hooks/useCourses'
 import CourseSessionList from '@/components/sessions/CourseSessionList'
 import CourseSessionForm from '@/components/sessions/CourseSessionForm'
+import SessionDayList from '@/components/sessions/SessionDayList'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 
-type ModalState = 'create' | 'edit' | 'delete' | null
+type ModalState = 'create' | 'edit' | 'delete' | 'manageDays' | null
 
 export default function Sessions() {
   const [modalState, setModalState] = useState<ModalState>(null)
@@ -46,6 +47,11 @@ export default function Sessions() {
       id: courseSession.id,
       status
     })
+  }
+
+  const handleManageDays = (courseSession: CourseSession) => {
+    setSelectedSession(courseSession)
+    setModalState('manageDays')
   }
 
   const handleSubmitForm = async (data: any) => {
@@ -89,6 +95,7 @@ export default function Sessions() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onUpdateStatus={handleUpdateStatus}
+        onManageDays={handleManageDays}
         isLoading={isLoading}
       />
 
@@ -105,6 +112,22 @@ export default function Sessions() {
           onCancel={handleCloseModal}
           isLoading={isFormLoading}
         />
+      </Modal>
+
+      {/* Manage Session Days Modal */}
+      <Modal
+        isOpen={modalState === 'manageDays'}
+        onClose={handleCloseModal}
+        title="Manage Session Days"
+        size="xl"
+      >
+        {selectedSession && (
+          <SessionDayList
+            sessionId={selectedSession.id}
+            sessionName={selectedSession.session_name}
+            courseName={courses.find(c => c.id === selectedSession.course_id)?.course_name}
+          />
+        )}
       </Modal>
 
       {/* Delete Confirmation Modal */}

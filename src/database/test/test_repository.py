@@ -3,10 +3,10 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from src.database.repository import (
     InstructorRepository, CourseRepository, LocationRepository,
-    RatingRepository, SessionRepository, AssignmentRepository
+    RatingRepository, SessionRepository, AssignmentRepository, CourseSessionDayRepository
 )
 from src.database.models import RatingType, SessionStatus, AssignmentStatus, SessionType
 
@@ -554,3 +554,276 @@ class TestAssignmentRepository:
         
         assert assignment1.id in assignment_ids
         assert assignment2.id in assignment_ids
+
+class TestCourseSessionDayRepository:
+    def test_create_session_day(self, db_session, sample_course, sample_location):
+        """Test creating a new course session day."""
+        # First create a session
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Test Session", date(2024, 8, 15), date(2024, 8, 17)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        session_day = repo.create(
+            session_id=session.id,
+            day_number=1,
+            date=date(2024, 8, 15),
+            location_id=sample_location.id,
+            start_time=time(9, 0),
+            end_time=time(17, 0),
+            session_type=SessionType.FULL_DAY
+        )
+        
+        assert session_day.id is not None
+        assert session_day.session_id == session.id
+        assert session_day.day_number == 1
+        assert session_day.date == date(2024, 8, 15)
+        assert session_day.location_id == sample_location.id
+        assert session_day.start_time == time(9, 0)
+        assert session_day.end_time == time(17, 0)
+        assert session_day.session_type == SessionType.FULL_DAY
+
+    def test_create_half_day_session(self, db_session, sample_course, sample_location):
+        """Test creating a half-day session."""
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Morning Session", date(2024, 8, 20), date(2024, 8, 20)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        session_day = repo.create(
+            session_id=session.id,
+            day_number=1,
+            date=date(2024, 8, 20),
+            location_id=sample_location.id,
+            start_time=time(9, 0),
+            end_time=time(13, 0),
+            session_type=SessionType.HALF_DAY
+        )
+        
+        assert session_day.session_type == SessionType.HALF_DAY
+        assert session_day.start_time == time(9, 0)
+        assert session_day.end_time == time(13, 0)
+
+    def test_get_by_id(self, db_session, sample_course, sample_location):
+        """Test retrieving a session day by ID."""
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Test Session", date(2024, 9, 1), date(2024, 9, 1)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        session_day = repo.create(
+            session.id, 1, date(2024, 9, 1), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        
+        retrieved = repo.get_by_id(session_day.id)
+        assert retrieved is not None
+        assert retrieved.id == session_day.id
+        assert retrieved.session_id == session.id
+
+    def test_get_by_id_nonexistent(self, db_session):
+        """Test retrieving a non-existent session day."""
+        repo = CourseSessionDayRepository(db_session)
+        retrieved = repo.get_by_id(99999)
+        assert retrieved is None
+
+    def test_get_by_session_id(self, db_session, sample_course, sample_location):
+        """Test retrieving all session days for a session."""
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Multi-Day Session", date(2024, 9, 5), date(2024, 9, 7)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        
+        # Create multiple session days
+        day1 = repo.create(
+            session.id, 1, date(2024, 9, 5), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        day2 = repo.create(
+            session.id, 2, date(2024, 9, 6), sample_location.id,
+            time(9, 0), time(13, 0), SessionType.HALF_DAY
+        )
+        day3 = repo.create(
+            session.id, 3, date(2024, 9, 7), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        
+        session_days = repo.get_by_session_id(session.id)
+        assert len(session_days) == 3
+        
+        # Should be ordered by day_number
+        assert session_days[0].day_number == 1
+        assert session_days[1].day_number == 2
+        assert session_days[2].day_number == 3
+
+    def test_get_by_date_range(self, db_session, sample_course, sample_location):
+        """Test retrieving session days within a date range."""
+        session_repo = SessionRepository(db_session)
+        session1 = session_repo.create_session(
+            sample_course.id, "August Session", date(2024, 8, 25), date(2024, 8, 25)
+        )
+        session2 = session_repo.create_session(
+            sample_course.id, "September Session", date(2024, 9, 10), date(2024, 9, 12)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        
+        # Create session days in different dates
+        day1 = repo.create(
+            session1.id, 1, date(2024, 8, 25), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        day2 = repo.create(
+            session2.id, 1, date(2024, 9, 10), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        day3 = repo.create(
+            session2.id, 2, date(2024, 9, 11), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        
+        # Test date range that includes only September sessions
+        session_days = repo.get_by_date_range(date(2024, 9, 1), date(2024, 9, 30))
+        assert len(session_days) == 2
+        session_day_ids = [sd.id for sd in session_days]
+        assert day2.id in session_day_ids
+        assert day3.id in session_day_ids
+        assert day1.id not in session_day_ids
+
+    def test_get_by_location_and_date(self, db_session, sample_course):
+        """Test retrieving session days by location and date."""
+        location_repo = LocationRepository(db_session)
+        location1 = location_repo.create("Location A")
+        location2 = location_repo.create("Location B")
+        
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Busy Day", date(2024, 10, 15), date(2024, 10, 15)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        
+        # Create multiple sessions on same date but different locations
+        day1 = repo.create(
+            session.id, 1, date(2024, 10, 15), location1.id,
+            time(9, 0), time(12, 0), SessionType.HALF_DAY
+        )
+        day2 = repo.create(
+            session.id, 2, date(2024, 10, 15), location1.id,
+            time(13, 0), time(17, 0), SessionType.HALF_DAY
+        )
+        day3 = repo.create(
+            session.id, 3, date(2024, 10, 15), location2.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        
+        # Get sessions for location1 on that date
+        location1_days = repo.get_by_location_and_date(location1.id, date(2024, 10, 15))
+        assert len(location1_days) == 2
+        
+        # Should be ordered by start_time
+        assert location1_days[0].start_time == time(9, 0)
+        assert location1_days[1].start_time == time(13, 0)
+        
+        # Get sessions for location2
+        location2_days = repo.get_by_location_and_date(location2.id, date(2024, 10, 15))
+        assert len(location2_days) == 1
+        assert location2_days[0].id == day3.id
+
+    def test_update_session_day(self, db_session, sample_course, sample_location):
+        """Test updating a session day."""
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Update Test", date(2024, 11, 1), date(2024, 11, 1)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        session_day = repo.create(
+            session.id, 1, date(2024, 11, 1), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        
+        # Update the session day
+        session_day.start_time = time(8, 0)
+        session_day.end_time = time(16, 0)
+        session_day.session_type = SessionType.HALF_DAY
+        
+        updated = repo.update(session_day)
+        
+        assert updated.start_time == time(8, 0)
+        assert updated.end_time == time(16, 0)
+        assert updated.session_type == SessionType.HALF_DAY
+        assert updated.id == session_day.id
+
+    def test_delete_session_day(self, db_session, sample_course, sample_location):
+        """Test deleting a session day."""
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "Delete Test", date(2024, 12, 1), date(2024, 12, 1)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        session_day = repo.create(
+            session.id, 1, date(2024, 12, 1), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        
+        session_day_id = session_day.id
+        
+        # Delete the session day
+        result = repo.delete(session_day_id)
+        assert result == True
+        
+        # Verify it's deleted
+        retrieved = repo.get_by_id(session_day_id)
+        assert retrieved is None
+
+    def test_delete_nonexistent_session_day(self, db_session):
+        """Test deleting a non-existent session day."""
+        repo = CourseSessionDayRepository(db_session)
+        result = repo.delete(99999)
+        assert result == False
+
+    def test_get_all_session_days(self, db_session, sample_course, sample_location):
+        """Test retrieving all session days."""
+        session_repo = SessionRepository(db_session)
+        session = session_repo.create_session(
+            sample_course.id, "All Days Test", date(2024, 12, 10), date(2024, 12, 12)
+        )
+        
+        repo = CourseSessionDayRepository(db_session)
+        
+        # Create session days with different dates and times
+        day1 = repo.create(
+            session.id, 1, date(2024, 12, 10), sample_location.id,
+            time(14, 0), time(18, 0), SessionType.HALF_DAY
+        )
+        day2 = repo.create(
+            session.id, 2, date(2024, 12, 11), sample_location.id,
+            time(9, 0), time(17, 0), SessionType.FULL_DAY
+        )
+        day3 = repo.create(
+            session.id, 3, date(2024, 12, 10), sample_location.id,
+            time(9, 0), time(13, 0), SessionType.HALF_DAY
+        )
+        
+        all_days = repo.get_all()
+        assert len(all_days) >= 3
+        
+        # Should be ordered by date, then start_time
+        # Find our created session days in the results
+        our_days = [day for day in all_days if day.session_id == session.id]
+        assert len(our_days) == 3
+        
+        # Verify ordering (date first, then start_time)
+        assert our_days[0].date <= our_days[1].date <= our_days[2].date
+        
+        # For same date, should be ordered by start_time
+        same_date_days = [day for day in our_days if day.date == date(2024, 12, 10)]
+        if len(same_date_days) > 1:
+            assert same_date_days[0].start_time <= same_date_days[1].start_time

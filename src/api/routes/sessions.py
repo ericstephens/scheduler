@@ -1,4 +1,5 @@
 from typing import List
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 import sys
@@ -7,7 +8,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
 from src.database.connection import get_db_session
-from src.database.repository import SessionRepository, CourseRepository, LocationRepository
+from src.database.repository import SessionRepository, CourseRepository, LocationRepository, CourseSessionDayRepository
 from src.database.models import SessionStatus, CourseSessionDay
 from src.database.utils import validate_session_dates, validate_session_times
 from ..schemas.session import (
@@ -20,6 +21,97 @@ router = APIRouter()
 
 def get_session_repo(db: Session = Depends(get_db_session)) -> SessionRepository:
     return SessionRepository(db)
+
+def get_session_day_repo(db: Session = Depends(get_db_session)) -> CourseSessionDayRepository:
+    return CourseSessionDayRepository(db)
+
+# Session day routes (put before parameterized routes to avoid conflicts)
+@router.get("/session-days", response_model=List[CourseSessionDayResponse])
+async def list_all_session_days(
+    start_date: date = Query(None, description="Filter by start date"),
+    end_date: date = Query(None, description="Filter by end date"),
+    location_id: int = Query(None, description="Filter by location ID"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+    session_day_repo: CourseSessionDayRepository = Depends(get_session_day_repo)
+):
+    """List all session days with optional filtering."""
+    if start_date and end_date:
+        session_days = session_day_repo.get_by_date_range(start_date, end_date)
+    elif location_id and start_date:
+        session_days = session_day_repo.get_by_location_and_date(location_id, start_date)
+    else:
+        session_days = session_day_repo.get_all()
+    
+    # Apply additional filters
+    if location_id and not start_date:
+        session_days = [sd for sd in session_days if sd.location_id == location_id]
+    
+    # Apply pagination
+    return session_days[skip:skip + limit]
+
+@router.get("/session-days/{session_day_id}", response_model=CourseSessionDayResponse)
+async def get_session_day(
+    session_day_id: int,
+    session_day_repo: CourseSessionDayRepository = Depends(get_session_day_repo)
+):
+    """Get a specific session day by ID."""
+    session_day = session_day_repo.get_by_id(session_day_id)
+    if not session_day:
+        raise HTTPException(status_code=404, detail="Session day not found")
+    return session_day
+
+@router.put("/session-days/{session_day_id}", response_model=CourseSessionDayResponse)
+async def update_session_day(
+    session_day_id: int,
+    session_day_update: CourseSessionDayUpdate,
+    session_day_repo: CourseSessionDayRepository = Depends(get_session_day_repo),
+    db: Session = Depends(get_db_session)
+):
+    """Update a session day."""
+    db_session_day = session_day_repo.get_by_id(session_day_id)
+    if not db_session_day:
+        raise HTTPException(status_code=404, detail="Session day not found")
+    
+    # Validate location if provided
+    if session_day_update.location_id:
+        location_repo = LocationRepository(db)
+        if not location_repo.get_by_id(session_day_update.location_id):
+            raise HTTPException(status_code=404, detail="Location not found")
+    
+    # Validate times if provided
+    start_time = session_day_update.start_time or db_session_day.start_time
+    end_time = session_day_update.end_time or db_session_day.end_time
+    if not validate_session_times(start_time, end_time):
+        raise HTTPException(status_code=400, detail="Invalid session times")
+    
+    # Update fields that are provided
+    update_data = session_day_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if field == "session_type" and value:
+            # Convert API enum to database enum
+            from src.database.models import SessionType
+            setattr(db_session_day, field, SessionType(value.value))
+        else:
+            setattr(db_session_day, field, value)
+    
+    try:
+        updated_session_day = session_day_repo.update(db_session_day)
+        return updated_session_day
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/session-days/{session_day_id}")
+async def delete_session_day(
+    session_day_id: int,
+    session_day_repo: CourseSessionDayRepository = Depends(get_session_day_repo)
+):
+    """Delete a session day."""
+    success = session_day_repo.delete(session_day_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Session day not found")
+    
+    return {"message": "Session day deleted successfully"}
 
 @router.post("/", response_model=CourseSessionResponse, status_code=201)
 async def create_session(
@@ -140,6 +232,7 @@ async def update_session_status(
 async def create_session_day(
     session_id: int,
     session_day: CourseSessionDayCreate,
+    session_day_repo: CourseSessionDayRepository = Depends(get_session_day_repo),
     db: Session = Depends(get_db_session)
 ):
     """Create a new session day."""
@@ -159,12 +252,12 @@ async def create_session_day(
         raise HTTPException(status_code=400, detail="Invalid session times")
     
     try:
-        from src.database.models import CourseSessionDay, SessionType
+        from src.database.models import SessionType
         
         # Convert API enum to database enum
         session_type = SessionType(session_day.session_type.value)
         
-        db_session_day = CourseSessionDay(
+        db_session_day = session_day_repo.create(
             session_id=session_id,
             day_number=session_day.day_number,
             date=session_day.date,
@@ -174,10 +267,6 @@ async def create_session_day(
             session_type=session_type
         )
         
-        db.add(db_session_day)
-        db.commit()
-        db.refresh(db_session_day)
-        
         return db_session_day
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -185,6 +274,7 @@ async def create_session_day(
 @router.get("/{session_id}/days", response_model=List[CourseSessionDayResponse])
 async def get_session_days(
     session_id: int,
+    session_day_repo: CourseSessionDayRepository = Depends(get_session_day_repo),
     db: Session = Depends(get_db_session)
 ):
     """Get all days for a specific session."""
@@ -194,7 +284,7 @@ async def get_session_days(
     if not session_repo.get_by_id(session_id):
         raise HTTPException(status_code=404, detail="Session not found")
     
-    session_days = db.query(CourseSessionDay).filter(CourseSessionDay.session_id == session_id).all()
+    session_days = session_day_repo.get_by_session_id(session_id)
     return session_days
 
 @router.post("/search", response_model=List[CourseSessionResponse])

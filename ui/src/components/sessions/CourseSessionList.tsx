@@ -12,6 +12,7 @@ interface CourseSessionListProps {
   onEdit: (courseSession: CourseSession) => void
   onDelete: (courseSession: CourseSession) => void
   onUpdateStatus: (courseSession: CourseSession, status: SessionStatus) => void
+  onManageDays?: (courseSession: CourseSession) => void
   isLoading?: boolean
   courses: { id: number; course_name: string; course_code: string }[]
 }
@@ -22,6 +23,7 @@ export default function CourseSessionList({
   onEdit,
   onDelete,
   onUpdateStatus,
+  onManageDays,
   isLoading = false,
   courses = [],
 }: CourseSessionListProps) {
@@ -167,6 +169,7 @@ export default function CourseSessionList({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onUpdateStatus={onUpdateStatus}
+                onManageDays={onManageDays}
                 courseName={sessionWithCourse.courseName}
                 courseCode={sessionWithCourse.courseCode}
               />
