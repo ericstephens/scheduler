@@ -32,24 +32,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```
 scheduler/
 ├── src/
-│   ├── frontend/      # React TypeScript frontend
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   ├── types/
-│   │   ├── utils/
-│   │   └── test/      # Frontend tests
-│   ├── api/           # Node.js API layer
+│   ├── ui/            # React TypeScript frontend
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── pages/
+│   │   │   ├── hooks/
+│   │   │   ├── types/
+│   │   │   ├── utils/
+│   │   │   └── services/
+│   │   ├── package.json
+│   │   └── vite.config.ts
+│   ├── api/           # FastAPI backend
 │   │   ├── routes/
-│   │   ├── controllers/
+│   │   ├── schemas/
 │   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── utils/
 │   │   └── test/      # API tests
 │   └── database/      # Database schema & migrations
-│       ├── prisma/
+│       ├── models.py
+│       ├── repository.py
 │       ├── migrations/
-│       └── seeds/
+│       └── test/      # Database tests
 ├── docker-compose.yml # For PostgreSQL container
 └── manage.sh          # Management script
 ```
@@ -136,7 +138,7 @@ Use podman commands instead of docker:
 
 ## Commands to Remember
 
-- **Development**: `npm run dev` (frontend), `npm run start:dev` (api)
+- **Development**: `cd src/ui && npm run dev` (frontend), `./manage.sh api-start` (API)
 - **Testing**: `npm test` (appropriate test runner per layer)
 - **Database**: `npx prisma migrate dev`, `npx prisma studio`
 - **Management**: `./manage.sh start|stop|restart`
