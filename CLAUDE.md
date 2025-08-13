@@ -149,3 +149,4 @@ Use podman commands instead of docker:
 - create test cases in each layer to validate the half day functionality. no adhoc curl commands for testing
 - i'll remind you again that if we need to test functionality, tests should be written for the respective layer (api, db). no random curl commands. this was a previous project memory so I need you to, um, remember it
 - make sure when running test cases you start with the db then do the api
+- always use the manage.sh script to start / stop any service and to conduct unit testing of any layer. incrementally modify it as needed
