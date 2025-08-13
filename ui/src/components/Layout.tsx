@@ -10,7 +10,7 @@ interface LayoutProps {
 const navigation = [
   { name: 'Instructors', href: '/instructors', icon: Users },
   { name: 'Courses', href: '/courses', icon: BookOpen },
-  { name: 'Sessions', href: '/sessions', icon: Calendar },
+  { name: 'Course Sessions', href: '/sessions', icon: Calendar },
   { name: 'Locations', href: '/locations', icon: MapPin },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
