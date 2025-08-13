@@ -106,6 +106,32 @@ api_start_prod() {
     run_in_env python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 }
 
+# UI management functions
+ui_start() {
+    log "Starting UI development server..."
+    cd "$SCRIPT_DIR/src/ui" && npm run dev
+}
+
+ui_stop() {
+    log "Stopping UI development server..."
+    # Find and kill processes running on common Vite ports (5173, 3000, 3001)
+    local ports="5173 3000 3001"
+    local killed=false
+    
+    for port in $ports; do
+        local pids=$(lsof -ti:$port 2>/dev/null || true)
+        if [ -n "$pids" ]; then
+            echo $pids | xargs kill -TERM
+            success "UI development server stopped (port $port)"
+            killed=true
+        fi
+    done
+    
+    if [ "$killed" = false ]; then
+        warn "No UI development server found running on ports: $ports"
+    fi
+}
+
 # Combined test functions
 test_all() {
     log "Running all tests..."
@@ -201,6 +227,10 @@ usage() {
     echo "  api-start         Start API development server"
     echo "  api-start-prod    Start API production server"
     echo ""
+    echo "UI Commands:"
+    echo "  ui-start          Start UI development server"
+    echo "  ui-stop           Stop UI development server"
+    echo ""
     echo "Testing Commands:"
     echo "  test-all          Run all tests (database + API)"
     echo "  test-all-coverage Run all tests with coverage report"
@@ -254,6 +284,12 @@ case "${1:-}" in
         ;;
     api-start-prod)
         api_start_prod
+        ;;
+    ui-start)
+        ui_start
+        ;;
+    ui-stop)
+        ui_stop
         ;;
     test-all)
         shift
